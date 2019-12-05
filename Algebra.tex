@@ -1,0 +1,484 @@
+\documentclass[12pt,a4paper]{report}
+\oddsidemargin=-40pt
+\topmargin=-35pt
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{
+colorlinks=true, %set true if you want colored links
+linktoc=all,     %set to all if you want both sections and subsections linked
+linkcolor=blue,  %choose some color, e.g. blue, if you want links to stand out
+}
+
+\begin{document}
+
+\chapter{Definition}
+\section{Special Number}
+Complex number:
+\begin{itemize}
+\item $0$
+\item $-1$
+%\item $\tau = 2\pi$
+\item $\tau = \frac{\pi}{2}$
+\item $i$
+\end{itemize}
+Infinity:
+\begin{itemize}
+%\item $\infty$
+\item $-\infty$
+\end{itemize}
+
+\section{Definition:Addition}
+\label{Definition:Addition}
+Closure: If $x$ and $y$ is complex number, then $x+y$ is complex number.
+
+\section{Definition:Exponential Function}
+\label{Definition:Exponential_Function}
+Closure: If $x$ is complex number, then $\exp(x)$ is complex number. \\
+
+\section{Definition:Logarithmic Function}
+\label{Definition:Logarithmic_Function}
+For $x \neq -\infty$ \\
+If $x$ is complex number and $x \neq 0$, then $\ln(x)$ is complex number. \\
+
+\section{Definition:Variable and Constant}
+x is complex number and $-\infty$. c is integer constant.
+
+\chapter{Axiom}
+\section{Axiom:Associativity}
+\label{Axiom:Associativity}
+\begin{align*}
+(x+y)+z = x+(y+z)
+\end{align*}
+
+\section{Axiom:Commutativity}
+\label{Axiom:Commutativity}
+\begin{align*}
+x+y = y+x
+\end{align*}
+
+\section{Axiom:Additive Identity}
+\label{Axiom:Additive_Identity}
+\begin{align*}
+x+0 = 0+x = x
+\end{align*}
+Simplification:
+\begin{align*}
+x+0 = 0+x = x \\
+c+0 = 0+c = c && \text{(basic arithmetic)}
+\end{align*}
+
+\section{Axiom:Addition of Infinity}
+\label{Axiom:Addition_of_Infinity}
+For $x$ is complex number,
+\begin{align*}
+\infty + x &= \infty && \text{not defined yet} \\
+-\infty + x &= -\infty \\
+\infty + \infty &= \infty && \text{not defined yet} \\
+(-\infty) + (-\infty) &= -\infty \\
+\infty + (-\infty) &&& \text{not defined} \\
+\end{align*}
+Simplification:
+\begin{align*}
+x-\infty = -\infty+x = -\infty \\
+c-\infty = -\infty+c = -\infty && \text{(basic arithmetic)}
+\end{align*}
+
+\section{Definition:Multiplicative Identity}
+\label{Definition:Multiplicative_Identity}
+\begin{align*}
+1 = \exp (0)
+\end{align*}
+Simplification:
+\begin{align*}
+\exp (0) = 1
+\end{align*}
+
+\section{Axiom:Additive Inverse}
+\label{Axiom:Additive_Inverse}
+\begin{align*}
+1 + (-1) = 0
+\end{align*}
+Simplification:
+\begin{align*}
+1 + (-1) = 0  && \text{(basic arithmetic)}
+\end{align*}
+
+\section{Definition:Multiplication}
+\label{Definition:Multiplication}
+For $x \neq -\infty$ and $y \neq -\infty$,
+\begin{align*}
+x \cdot y = \exp(\ln(x) + \ln(y))
+\end{align*}
+
+\section{Axiom:Distributivity}
+\label{Axiom:Distributivity}
+\begin{align*}
+(x+y) \cdot z = x \cdot z + y \cdot z
+\end{align*}
+Expansion: (good for intermediate step for term cancellation)
+\begin{align*}
+\exp(\ln(x+y) + z) = \exp(\ln(x) + z) + \exp(\ln(y) + z) \\
+\end{align*}
+Factorization: (good for the final step)
+\begin{align*}
+\exp(\ln(x) + z) + \exp(\ln(y) + z) = \exp(\ln(x+y) + z) \\
+\end{align*}
+Simplification: \\
+$c_1 \exp(x) + c_2 \exp(x) = (c_1+c_2) \exp(x)$
+\begin{align*}
+\exp(\ln(c_1) + x) + \exp(\ln(c_2) + x) = \exp(\ln(c_1+c_2) + x) \\
+\end{align*}
+Summation of the same term: \\
+$\exp(x) + y \exp(x) = (1+y) \exp(x)$
+\begin{align*}
+\exp(x) + \exp(\ln(y) + x) = \exp(\ln(y+1) + x) \\
+\end{align*}
+$\exp(x) + c \exp(x) = (1+c) \exp(x)$
+\begin{align*}
+\exp(x) + \exp(\ln(c) + x) = \exp(\ln(c+1) + x) \\
+\end{align*}
+$x + y x = (1+y) x$, do this simplification before expansion
+\begin{align}
+x + \exp(\ln(y) + \ln(x)) &= \exp(\ln(y+1) + \ln(x)) \label{Implementation:Summation_of_Term_1}
+\end{align}
+$x + c x = (1+c) x$, do this simplification before expansion
+\begin{align}
+x + \exp(\ln(c) + \ln(x)) &= \exp(\ln(c+1) + \ln(x)) \label{Implementation:Summation_of_Term_2}
+\end{align}
+$x + x = 2x$, do this simplification before expansion
+\begin{align}
+x + x &= \exp(\ln(2) + \ln(x)) \label{Implementation:Summation_of_Term_3}
+\end{align}
+For example,
+\begin{align*}
+& 6(x+y) + 2(x+y) - 5y - 3y \\
+&= 8(x+y)- 8y &= 6x +6y + 2x +2y - 5y - 3y \\
+&=8x+8y-8y &= 8x \\
+&=8x
+\end{align*}
+
+\section{Axiom:Inverse Function 1}
+\label{Axiom:Inverse_Function_1}
+For $x \neq -\infty$,
+\begin{align*}
+\exp (\ln (x)) &= x \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp (\ln (x)) &= x \\
+\end{align*}
+
+\section{Axiom:Inverse Function 2}
+\label{Axiom:Inverse_Function_2}
+\begin{align*}
+\exp (\ln (\exp (x)) + y) &= \exp(x + y) \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp (\ln (\exp (x)) + y) &= \exp(x + y) \\
+\end{align*}
+
+\section{Axiom:Exponentiation of Infinity}
+\label{Axiom:Exponentiation_of_Infinity}
+\begin{align*}
+\exp (-\infty) &= 0 \\
+\exp (\infty) = \pm \infty && \text{not defined}
+\end{align*}
+Simplification:
+\begin{align*}
+\exp (-\infty) &= 0 \\
+\end{align*}
+
+\section{Definition:Multiplicative Inverse}
+\label{Definition:Multiplicative_Inverse}
+For $x \neq 0$ and $x \neq -\infty$,
+\begin{align*}
+x^{-1} = \exp(-\ln(x))
+\end{align*}
+
+\section{Definition:Fraction}
+\label{Definition:Fraction}
+For $x \neq -\infty$, $y \neq 0$ and $y \neq -\infty$,
+\begin{align*}
+\frac{x}{y} = x \cdot y^{-1}
+\end{align*}
+
+\section{Axiom:Exponentiation of tau and i}
+\label{Axiom:Exponentiation_of_tau_and_i}
+\begin{align*}
+\exp (2 \cdot \tau \cdot i) &= -1 \\
+\exp (\tau \cdot i) &= i \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp \big(\exp[ (\ln(2) + \ln(\tau) + \ln(i) ] \big) &= -1 \\
+\exp \big(\exp[ (\ln(\tau) + \ln(i) ] \big) &= i \\
+\end{align*}
+
+\chapter{Field Theorem}
+\section{Theorem:Multiplicative Associativity}
+\label{Theorem:Multiplicative_Associativity}
+For $x \neq -\infty$ and $y \neq -\infty$ and and $z \neq -\infty$,
+\begin{align*}
+(x \cdot y) \cdot z
+&= \exp(\ln(x) + \ln(y)) \cdot z
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp(\ln(\exp(\ln(x) + \ln(y))) + \ln(z))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp((\ln(x) + \ln(y)) + \ln(z))
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+&= \exp(\ln(x) + (\ln(y) + \ln(z)))
+&& \text{Axiom \ref{Axiom:Associativity}} \\
+&= \exp(\ln(x) + \ln(\exp(\ln(y) + \ln(z))))
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+&= x \cdot \exp(\ln(y) + \ln(z))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= x \cdot (y \cdot z)
+&& \text{Definition \ref{Definition:Multiplication}} \\
+\end{align*}
+Reduction:
+\begin{align*}
+\exp(\ln(x) + \ln(y) + \ln(z))
+\end{align*}
+
+\section{Theorem:Multiplicative Commutativity}
+\label{Theorem:Multiplicative_Commutativity}
+For $x \neq -\infty$ and $y \neq -\infty$,
+\begin{align*}
+x \cdot y
+&= \exp(\ln(x) + \ln(y))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp(\ln(y) + \ln(x))
+&& \text{Axiom \ref{Axiom:Commutativity}} \\
+&= y \cdot x
+&& \text{Definition \ref{Definition:Multiplication}} \\
+\end{align*}
+Reduction:
+\begin{align*}
+\exp(\ln(x) + \ln(y))
+\end{align*}
+
+\section{Theorem:Logarithm of One}
+\label{Theorem:Logarithm_of_One}
+\begin{align*}
+\exp(\ln(1) + y)
+&= \exp(\ln(\exp(0)) + y)
+&& \text{Definition \ref{Definition:Multiplicative_Identity}} \\
+&= \exp(0 + y)
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp(\ln(1) + y) &= \exp(0 + y) \\
+\end{align*}
+
+\section{Theorem:Logarithm of Zero}
+\label{Theorem:Logarithm_of_Zero}
+\begin{align*}
+\exp(\ln(0) + y)
+&= \exp(\ln(\exp(-\infty)) + y)
+&& \text{Axiom \ref{Axiom:Exponentiation_of_Infinity}} \\
+&= \exp(-\infty + y)
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp(\ln(0) + y) &= \exp(-\infty + y) \\
+\end{align*}
+
+\section{Theorem:Logarithm of Negative One}
+\label{Theorem:Logarithm_of_Negative_One}
+\begin{align*}
+\exp(\ln(-1) + y)
+&= \exp(\ln(\exp(2 \cdot \tau \cdot i)) + y)
+&& \text{Axiom \ref{Axiom:Exponentiation_of_tau_and_i}} \\
+&= \exp(2 \cdot \tau \cdot i + y)
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp(\ln(-1) + y) &= \exp(2 \cdot \tau \cdot i + y) \\
+\end{align*}
+
+\section{Theorem:Logarithm of i}
+\label{Theorem:Logarithm_of_i}
+\begin{align*}
+\exp(\ln(i) + y)
+&= \exp(\ln(\exp(\tau \cdot i)) + y)
+&& \text{Axiom \ref{Axiom:Exponentiation_of_tau_and_i}} \\
+&= \exp(\tau \cdot i + y)
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+\end{align*}
+Simplification:
+\begin{align*}
+\exp(\ln(i) + y) &= \exp(\tau \cdot i + y) \\
+\end{align*}
+
+\section{Theorem:Multiplicative Identity}
+\label{Theorem:Multiplicative_Identity}
+For $x \neq -\infty$,
+\begin{align*}
+1 \cdot x
+&= \exp(\ln(1) + \ln(x))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp(0 + \ln(x))
+&& \text{Theorem \ref{Theorem:Logarithm_of_One}} \\
+&= \exp(\ln(x))
+&& \text{Axiom \ref{Axiom:Additive_Identity}} \\
+&= x
+&& \text{Axiom \ref{Axiom:Inverse_Function_1}} \\
+\end{align*}
+Auto Simplification
+
+\section{Theorem:Multiplication of Zero}
+\label{Theorem:Multiplication_of_Zero}
+For $x \neq -\infty$,
+\begin{align*}
+0 \cdot x
+&= \exp(\ln(0) + \ln(x))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp(-\infty + \ln(x))
+&& \text{Theorem \ref{Theorem:Logarithm_of_Zero}} \\
+&= \exp(-\infty)
+&& \text{Axiom \ref{Axiom:Addition_of_Infinity}} \\
+&= 0
+&& \text{Axiom \ref{Axiom:Exponentiation_of_Infinity}} \\
+\end{align*}
+Auto Simplification
+
+\section{Theorem:Summation of Term 1}
+\label{Theorem:Summation_of_Term_1}
+\begin{align*}
+x + y \cdot x
+&= 1 \cdot x + y \cdot x
+&& \text{Theorem \ref{Theorem:Multiplicative_Identity}} \\
+&= (1+y) \cdot x
+&& \text{Axiom \ref{Axiom:Distributivity}} \\
+\end{align*}
+Simplification: (same as Implementation \ref{Implementation:Summation_of_Term_1} and \ref{Implementation:Summation_of_Term_2})
+\begin{align*}
+x + \exp(\ln(y) + \ln(x)) &= \exp(\ln(y+1) + \ln(x)) \\
+\end{align*}
+
+\section{Definition:Additive Inverse}
+\label{Definition:Additive_Inverse}
+\begin{align*}
+-x = (-1) \cdot x
+\end{align*}
+
+\section{Theorem:Additive Inverse}
+\label{Theorem:Additive_Inverse}
+For $x \neq -\infty$,
+\begin{align*}
+x + (-x)
+&= x + (-1) \cdot x
+&& \text{Definition \ref{Definition:Additive_Inverse}} \\
+&= (1 + (-1)) \cdot x
+&& \text{Theorem \ref{Theorem:Summation_of_Term_1}} \\
+&= 0 \cdot x
+&& \text{Axiom \ref{Axiom:Additive_Inverse}} \\
+&= 0
+&& \text{Theorem \ref{Theorem:Multiplication_of_Zero}} \\
+\end{align*}
+Auto Simplification
+
+\section{Defintion:Two}
+\label{Defintion:Two}
+\begin{align*}
+2 &= 1+1 \\
+\end{align*}
+
+\section{Theorem:Summation of Term 3}
+\label{Theorem:Summation_of_Term_3}
+\begin{align*}
+x + x
+&= 1 \cdot x + 1 \cdot x
+&& \text{Theorem \ref{Theorem:Multiplicative_Identity}} \\
+&= (1+1) \cdot x
+&& \text{Axiom \ref{Axiom:Distributivity}} \\
+&= 2 \cdot x
+&& \text{Defintion \ref{Defintion:Two}} \\
+\end{align*}
+Simplification: (same as Implementation \ref{Implementation:Summation_of_Term_3})
+\begin{align*}
+x + x &= \exp(\ln(2) + \ln(x)) \\
+\end{align*}
+
+\section{Theorem:Multiplicative Inverse}
+\label{Theorem:Multiplicative_Inverse}
+For $x \neq 0$ and $x \neq -\infty$,
+\begin{align*}
+x \cdot x^{-1}
+&= x \cdot \exp(-\ln(x))
+&& \text{Definition \ref{Definition:Multiplicative_Inverse}} \\
+&= \exp( \ln(x) + \ln(\exp(-\ln(x))) )
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp( \ln(x) + (-\ln(x)) )
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+&= \exp(0)
+&& \text{Theorem \ref{Theorem:Additive_Inverse}} \\
+&= 1
+&& \text{Definition \ref{Definition:Multiplicative_Identity}} \\
+\end{align*}
+Auto Simplification
+
+\section{Theorem:Multiplication of Positive and Negative}
+\label{Theorem:Multiplication_of_Positive_and_Negative}
+For $x \neq -\infty$,
+\begin{align*}
+x \cdot (-x)
+&= x \cdot (-x) + 0
+&& \text{Axiom \ref{Axiom:Additive_Identity}} \\
+&= x \cdot (-x) + x \cdot x + (- (x \cdot x))
+&& \text{Theorem \ref{Theorem:Additive_Inverse}} \\
+&= x \cdot ((-x)+x) + (- (x \cdot x))
+&& \text{Axiom \ref{Axiom:Distributivity}} \\
+&= x \cdot 0 + (- (x \cdot x))
+&& \text{Theorem \ref{Theorem:Additive_Inverse}} \\
+&= 0 + (- (x \cdot x))
+&& \text{Theorem \ref{Theorem:Multiplication_of_Zero}} \\
+&= - (x \cdot x)
+&& \text{Axiom \ref{Axiom:Additive_Identity}} \\
+\end{align*}
+Reduction:
+\begin{align*}
+\exp(\ln(-1) + \ln(x) + \ln(x) )
+\end{align*}
+
+\section{Theorem:Multiplication of Negative and Negative}
+\label{Theorem:Multiplication_of_Negative_and_Negative}
+For $x \neq -\infty$,
+\begin{align*}
+(-x) \cdot (-x)
+\end{align*}
+
+\section{Theorem:Imaginary Unit}
+\label{Theorem:Imaginary_Unit}
+\begin{align*}
+i \cdot i &= -1 \\
+\end{align*}
+
+\section{Theorem:Exponentiation of tau and i}
+\label{Theorem:Exponentiation_of_tau_i}
+\begin{align*}
+\exp (\tau \cdot i) &= 1 \\
+\end{align*}
+
+\section{Theorem:Exponential Law}
+\label{Theorem:Exponential_Law}
+For $x \neq -\infty$ and $y \neq -\infty$,
+\begin{align*}
+\exp(x) \cdot \exp(y)
+&= \exp(\ln(\exp(x)) + \ln(\exp(y)))
+&& \text{Definition \ref{Definition:Multiplication}} \\
+&= \exp(x + \ln(\exp(y)))
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+&= \exp(x + y)
+&& \text{Axiom \ref{Axiom:Inverse_Function_2}} \\
+\end{align*}
+Reduction:
+\begin{align*}
+\exp(x + y)
+\end{align*}
+
+\end{document}
