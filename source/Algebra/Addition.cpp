@@ -25,6 +25,45 @@ bool compare(unsigned int depth1, unsigned int orderType1, int order1, unsigned 
     else return false;
 }
 
+bool eraseParenthesis(string& latex)
+{
+    if(latex[0] != '(' || latex[latex.size()-1] != ')') return false;
+    
+    bool isErase = false;
+    unsigned int index = 0;
+    int parenthesisLevel = 0;
+    while(true)
+    {
+        if(latex[index] == '(') parenthesisLevel++;
+        else if(latex[index] == ')')
+        {
+            parenthesisLevel--;
+            if(parenthesisLevel == 0)
+            {
+                if(index+1 == latex.size()) isErase = true;
+                else isErase = false;
+                
+                break;
+            }
+        }
+        
+        if(index+1 == latex.size())
+        {
+            cout<<"Error: Impossible case"<<endl;
+            break;
+        }
+        else index++;
+    }
+    
+    if(isErase)
+    {
+        latex.erase(0,1);
+        latex.erase(latex.size()-1,1);
+    }
+    
+    return isErase;
+}
+
 Addition::Addition()
 {
     mother = nullptr;
@@ -61,13 +100,8 @@ Addition::Addition(string latex)
     //erase "(" and ")"
     while(true)
     {
-        if(trim[0] == '(' && trim[trim.size()-1] == ')')
-        {
-            
-            trim.erase(0,1);
-            trim.erase(trim.size()-1,1);
-        }
-        else break;
+        bool isErase = eraseParenthesis(trim);
+        if(!isErase) break;
     }
     
     if(trim.size() == 1 && trim[0] == '0')
@@ -605,17 +639,9 @@ string Addition::getLatex()
     for(unsigned int i = 0; i < add.size() ; i++)
     {
         string operand_latex = add[i]->getLatex();
-        if(operand_latex[0] == '-')
-        {
-            output += " + (";
-            output += operand_latex;
-            output += ")";
-        }
-        else
-        {
-            output += " + ";
-            output += operand_latex;
-        }
+        output += " + (";
+        output += operand_latex;
+        output += ")";
     }
     
     //erase " + "
@@ -626,10 +652,10 @@ string Addition::getLatex()
     else output.erase(0,3);
     
     //erase "(" and ")"
-    if(output[0] == '(' && output[output.size()-1] == ')')
+    while(true)
     {
-        output.erase(0,1);
-        output.erase(output.size()-1,1);
+        bool isErase = eraseParenthesis(output);
+        if(!isErase) break;
     }
     
     
