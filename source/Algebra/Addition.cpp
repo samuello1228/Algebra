@@ -759,11 +759,63 @@ string Addition::getLatex()
         if(!isErase) break;
     }
     
-    
     return output;
 }
 
 void Addition::print()
 {
     cout<<getLatex()<<endl;
+}
+
+Addition* Addition::getCopy()
+{
+    Addition* copy = new Addition();
+    
+    copy->mother = nullptr;
+    copy->motherType = 0;
+    
+    copy->depth = depth;
+    copy->orderType = orderType;
+    copy->order = order;
+    
+    copy->nZero = nZero;
+    copy->nNegative = nNegative;
+    copy->positveInterger = positveInterger;
+    copy->nTau = nTau;
+    copy->nComplex = nComplex;
+    copy->nInfinity = nInfinity;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        copy->variable.push_back(variable[i]);
+    }
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        Addition* element = exp[i]->getCopy();
+        element->mother = this;
+        element->motherType = 1;
+        
+        copy->exp.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        Addition* element = ln[i]->getCopy();
+        element->mother = this;
+        element->motherType = 2;
+        
+        copy->ln.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        Addition* element = add[i]->getCopy();
+        element->mother = this;
+        element->motherType = 3;
+        
+        copy->add.push_back(element);
+    }
+    
+    return copy;
 }

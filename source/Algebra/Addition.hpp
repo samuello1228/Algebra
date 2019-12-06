@@ -51,6 +51,8 @@ public:
     
     string getLatex();
     void print();
+    
+    Addition* getCopy();
 };
 
 #endif /* Addition_hpp */
