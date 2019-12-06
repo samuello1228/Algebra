@@ -71,7 +71,7 @@ Addition::Addition()
     
     depth = 0;
     orderType = 0;
-    order = 0; 
+    order = 0;
     
     nZero = false;
     nNegative = false;
@@ -102,6 +102,109 @@ Addition::Addition(string latex)
     {
         bool isErase = eraseParenthesis(trim);
         if(!isErase) break;
+    }
+    
+    {
+        // For addition
+        if(trim[0] == '+' || trim[trim.size()-1] == '+')
+        {
+            cout<<"Syntax Error: the expression has + sign at the beginning or the end"<<endl;
+            return;
+        }
+        
+        //split by "+" sign
+        unsigned int index = 0;
+        vector<string> operand_latex_list;
+        string operand_latex;
+        int parenthesisLevel = 0;
+        while(true)
+        {
+            if(trim[index] == '+' && parenthesisLevel == 0)
+            {
+                operand_latex_list.push_back(operand_latex);
+                operand_latex.clear();
+            }
+            else
+            {
+                operand_latex += trim[index];
+                if(trim[index] == '(') parenthesisLevel++;
+                else if(trim[index] == ')') parenthesisLevel--;
+            }
+            
+            if(index+1 == trim.size())
+            {
+                operand_latex_list.push_back(operand_latex);
+                operand_latex.clear();
+                break;
+            }
+            else index++;
+        }
+        
+        if(operand_latex_list.size() >= 2)
+        {
+            //For f(x) + g(x)
+            
+            depth = 0;
+            orderType = 0;
+            for(unsigned int i = 0; i < operand_latex_list.size() ; i++)
+            {
+                Addition* operand = new Addition(operand_latex_list[i]);
+                
+                operand->mother = this;
+                operand->motherType = 3;
+                
+                mother = nullptr;
+                motherType = 0;
+                
+                if(operand->depth +1 > depth) depth = operand->depth +1;
+                
+                if(orderType == 0)
+                {
+                    //initialization
+                    orderType = operand->orderType;
+                    
+                    if(operand->orderType == 2) order = operand->order;
+                    else order = 0;
+                }
+                else if(orderType == 1)
+                {
+                    orderType = operand->orderType;
+                    if(operand->orderType == 2) order = operand->order;
+                }
+                else if(orderType == 2)
+                {
+                    if(operand->orderType == 2)
+                    {
+                        if(order != operand->order)
+                        {
+                            orderType = 3;
+                            order = 0;
+                        }
+                    }
+                    else if(operand->orderType == 3)
+                    {
+                        orderType = 3;
+                        order = 0;
+                    }
+                }
+                
+                nZero = false;
+                nNegative = false;
+                positveInterger = 0;
+                nTau = false;
+                nComplex = false;
+                nInfinity = false;
+                
+                add.push_back(operand);
+            }
+            
+            sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
+                return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+            });
+            
+            return;
+        }
+        
     }
     
     if(trim.size() == 1 && trim[0] == '0')
@@ -218,6 +321,24 @@ Addition::Addition(string latex)
         nInfinity = false;
         return;
     }
+    else if(trim.size() == 4 && trim[0] == '\\' && trim[1] == 't' && trim[2] == 'a' && trim[3] == 'u')
+    {
+        //For tau
+        mother = nullptr;
+        motherType = 0;
+        
+        depth = 1;
+        orderType = 1;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        positveInterger = 0;
+        nTau = true;
+        nComplex = false;
+        nInfinity = false;
+        return;
+    }
     else if(trim.size() == 7 && trim[0] == '-' && trim[1] == '\\' && trim[2] == 'i' && trim[3] == 'n' && trim[4] == 'f' && trim[5] == 't' && trim[6] == 'y')
     {
         //For -\infty
@@ -236,7 +357,46 @@ Addition::Addition(string latex)
         nInfinity = true;
         return;
     }
-    else if(trim[0] == '\\')
+    
+    //For positive integer
+    if(trim[0] != '0' && std::isdigit(trim[0]))
+    {
+        unsigned int index = 0;
+        string positive_integer;
+        while(true)
+        {
+            positive_integer += trim[index];
+            
+            if(index+1 == trim.size())
+            {
+                //For positive integer
+                mother = nullptr;
+                motherType = 0;
+                
+                depth = 1;
+                orderType = 1;
+                order = 0;
+                
+                nZero = false;
+                nNegative = false;
+                positveInterger = std::stoi(positive_integer);
+                nTau = false;
+                nComplex = false;
+                nInfinity = false;
+                return;
+            }
+            else if(std::isdigit(trim[index+1]))
+            {
+                index++;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    
+    if(trim[0] == '\\')
     {
         //For \exp and \ln
         if(trim.size() <= 3)
@@ -302,24 +462,6 @@ Addition::Addition(string latex)
                 }
                 else index++;
             }
-        }
-        else if(trim.size() == 4 && trim[1] == 't' && trim[2] == 'a' && trim[3] == 'u')
-        {
-            //For tau
-            mother = nullptr;
-            motherType = 0;
-            
-            depth = 1;
-            orderType = 1;
-            order = 0;
-            
-            nZero = false;
-            nNegative = false;
-            positveInterger = 0;
-            nTau = true;
-            nComplex = false;
-            nInfinity = false;
-            return;
         }
         else if(trim.size() <= 4)
         {
@@ -390,163 +532,25 @@ Addition::Addition(string latex)
             return;
         }
     }
-    else
+    
     {
-        //For positive integer
-        if(trim[0] != '0' && std::isdigit(trim[0]))
-        {
-            unsigned int index = 0;
-            string positive_integer;
-            while(true)
-            {
-                positive_integer += trim[index];
-                
-                if(index+1 == trim.size())
-                {
-                    //For positive integer
-                    mother = nullptr;
-                    motherType = 0;
-                    
-                    depth = 1;
-                    orderType = 1;
-                    order = 0;
-                    
-                    nZero = false;
-                    nNegative = false;
-                    positveInterger = std::stoi(positive_integer);
-                    nTau = false;
-                    nComplex = false;
-                    nInfinity = false;
-                    return;
-                }
-                else if(std::isdigit(trim[index+1]))
-                {
-                    index++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        // For addition and other thing
-        if(trim[0] == '+' || trim[trim.size()-1] == '+')
-        {
-            cout<<"Syntax Error: the expression has + sign at the beginning or the end"<<endl;
-            return;
-        }
+        cout<<"Syntax Error: the expression cannot be processed"<<endl;
         
-        //split by "+" sign
-        unsigned int index = 0;
-        vector<string> operand_latex_list;
-        string operand_latex;
-        int parenthesisLevel = 0;
-        while(true)
-        {
-            if(trim[index] == '+' && parenthesisLevel == 0)
-            {
-                operand_latex_list.push_back(operand_latex);
-                operand_latex.clear();
-            }
-            else
-            {
-                operand_latex += trim[index];
-                if(trim[index] == '(') parenthesisLevel++;
-                else if(trim[index] == ')') parenthesisLevel--;
-            }
-            
-            if(index+1 == trim.size())
-            {
-                operand_latex_list.push_back(operand_latex);
-                operand_latex.clear();
-                break;
-            }
-            else index++;
-        }
+        mother = nullptr;
+        motherType = 0;
         
-        if(operand_latex_list.size() >= 2)
-        {
-            //For f(x) + g(x)
-            
-            depth = 0;
-            orderType = 0;
-            for(unsigned int i = 0; i < operand_latex_list.size() ; i++)
-            {
-                Addition* operand = new Addition(operand_latex_list[i]);
-                
-                operand->mother = this;
-                operand->motherType = 3;
-                
-                mother = nullptr;
-                motherType = 0;
-                
-                if(operand->depth +1 > depth) depth = operand->depth +1;
-                
-                if(orderType == 0)
-                {
-                    //initialization
-                    orderType = operand->orderType;
-                    
-                    if(operand->orderType == 2) order = operand->order;
-                    else order = 0;
-                }
-                else if(orderType == 1)
-                {
-                    orderType = operand->orderType;
-                    if(operand->orderType == 2) order = operand->order;
-                }
-                else if(orderType == 2)
-                {
-                    if(operand->orderType == 2)
-                    {
-                        if(order != operand->order)
-                        {
-                            orderType = 3;
-                            order = 0;
-                        }
-                    }
-                    else if(operand->orderType == 3)
-                    {
-                        orderType = 3;
-                        order = 0;
-                    }
-                }
-                
-                nZero = false;
-                nNegative = false;
-                positveInterger = 0;
-                nTau = false;
-                nComplex = false;
-                nInfinity = false;
-                
-                add.push_back(operand);
-            }
-            
-            sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
-                return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-            });
-        }
-        else
-        {
-            cout<<"Syntax Error: the expression cannot be processed"<<endl;
-            
-            mother = nullptr;
-            motherType = 0;
-            
-            depth = 0;
-            orderType = 0;
-            order = 0;
-            
-            nZero = false;
-            nNegative = false;
-            positveInterger = 0;
-            nTau = false;
-            nComplex = false;
-            nInfinity = false;
-            
-            return;
-        }
+        depth = 0;
+        orderType = 0;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        positveInterger = 0;
+        nTau = false;
+        nComplex = false;
+        nInfinity = false;
+        
+        return;
     }
 }
 
@@ -645,7 +649,7 @@ Addition::Addition(Addition* operand1, Addition* operand2)
     
     add.push_back(operand1);
     add.push_back(operand2);
-
+    
     sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
         return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
     });
