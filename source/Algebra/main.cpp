@@ -24,9 +24,17 @@ int main()
     Addition* z = new Addition("z");
     
     //test
-    Addition* Test_Additive_Identity = new Addition(x->getCopy(),zero->getCopy());
-    Test_Additive_Identity->print();
-    delete Test_Additive_Identity;
+    //Addition* test = new Addition("((2) + (-1)) + ((-1) + (0))");
+    //Addition* test = new Addition("((-1) + (-1)) + ((-1) + (0))");
+    //Addition* test = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
+    //Addition* test = new Addition("((i) + (i)) + ((i) + (0))");
+    //Addition* test = new Addition("((-\\infty) + (-\\infty)) + ((-\\infty) + (x))");
+    //Addition* test = new Addition("((x) + (z) + (z) + (x) + (z))");
+    //Addition* test = new Addition("(\\exp(x) + \\exp(z)) + (\\exp(z) + \\exp(x) + \\exp(z))");
+    Addition* test = new Addition("(\\ln(x) + \\ln(z)) + (\\ln(z) + \\ln(x) + \\ln(z))");
+    test->print();
+    test->cleanAdd();
+    delete test;
     
     //delete
     delete zero;

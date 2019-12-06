@@ -45,6 +45,7 @@ public:
     //Constructor
     Addition();
     Addition(string latex);
+    Addition(int fundamentalType, unsigned int x); //fundamentalType: 1 = positveInterger, 2 = the nth variable
     Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln
     Addition(Addition* operand1, Addition* operand2); // addition
     ~Addition();
@@ -53,6 +54,10 @@ public:
     void print();
     
     Addition* getCopy();
+    bool isEmpty();
+    Addition* getTopmost();
+    void cleanAdd();
+    void simplification();
 };
 
 #endif /* Addition_hpp */

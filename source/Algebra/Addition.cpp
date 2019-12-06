@@ -64,6 +64,22 @@ bool eraseParenthesis(string& latex)
     return isErase;
 }
 
+void eraseEmptyElement(vector<Addition*>& list)
+{
+    int index = 0;
+    while(true)
+    {
+        if(index >= list.size()) break;
+        
+        if(list[index]->isEmpty())
+        {
+            delete list[index];
+            list.erase(list.begin()+index);
+        }
+        else index++;
+    }
+}
+
 Addition::Addition()
 {
     mother = nullptr;
@@ -554,6 +570,53 @@ Addition::Addition(string latex)
     }
 }
 
+Addition::Addition(int fundamentalType,unsigned int x)
+{
+    if(fundamentalType == 1)
+    {
+        //For positive integer
+        mother = nullptr;
+        motherType = 0;
+        
+        depth = 1;
+        orderType = 1;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        positveInterger = x;
+        nTau = false;
+        nComplex = false;
+        nInfinity = false;
+        return;
+    }
+    if(fundamentalType == 2)
+    {
+        //For the nth variable
+        mother = nullptr;
+        motherType = 0;
+        
+        depth = 1;
+        orderType = 2;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        positveInterger = 0;
+        nTau = false;
+        nComplex = false;
+        nInfinity = false;
+        
+        for(int i = 0; i < x ; i++)
+        {
+            variable.push_back(false);
+        }
+        variable.push_back(true);
+        
+        return;
+    }
+}
+
 Addition::Addition(int compositeType, Addition* operand)
 {
     operand->mother = this;
@@ -822,4 +885,274 @@ Addition* Addition::getCopy()
     }
     
     return copy;
+}
+
+bool Addition::isEmpty()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
+Addition* Addition::getTopmost()
+{
+    Addition* son = this;
+    while(true)
+    {
+        if(son->mother == nullptr) return son;
+        else son = son->mother;
+    }
+}
+
+void Addition::cleanAdd()
+{
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->cleanAdd();
+    }
+    
+    //-inf
+    bool existInfinity = false;
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        if(add[i]->nInfinity) existInfinity = true;
+    }
+    
+    //erase all elements in add
+    if(existInfinity)
+    {
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            delete add[i];
+        }
+        add.clear();
+        
+        nInfinity = true;
+        
+        getTopmost()->print();
+        return;
+    }
+    
+    //zero
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->nZero = false;
+    }
+    
+    //positveInterger
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        positveInterger += add[i]->positveInterger;
+        add[i]->positveInterger = 0;
+    }
+    
+    //negative
+    {
+        int negativeSum = 0;
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nNegative) negativeSum++;
+            add[i]->nNegative = false;
+        }
+        
+        if(negativeSum <= positveInterger)
+        {
+            positveInterger = positveInterger - negativeSum;
+        }
+        else if(negativeSum - positveInterger == 1)
+        {
+            nNegative = true;
+        }
+        else
+        {
+            Addition* c = new Addition(1,negativeSum - positveInterger);
+            Addition* ln_c = new Addition(2,c);
+            Addition* ln_n1 = new Addition("\\ln(-1)");
+            
+            exp.push_back(ln_n1);
+            exp.push_back(ln_c);
+        }
+    }
+    
+    //tau
+    {
+        unsigned int sum = 0;
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nTau) sum++;
+            add[i]->nTau = false;
+        }
+        
+        if(sum != 0)
+        {
+            if(sum == 1)
+            {
+                nTau = true;
+            }
+            else
+            {
+                Addition* c = new Addition(1,sum);
+                Addition* ln_c = new Addition(2,c);
+                Addition* ln_tau = new Addition("\\ln(\\tau)");
+                
+                exp.push_back(ln_tau);
+                exp.push_back(ln_c);
+            }
+        }
+    }
+    
+    //i
+    {
+        unsigned int sum = 0;
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nComplex) sum++;
+            add[i]->nComplex = false;
+        }
+        
+        if(sum != 0)
+        {
+            if(sum == 1)
+            {
+                nComplex = true;
+            }
+            else
+            {
+                Addition* c = new Addition(1,sum);
+                Addition* ln_c = new Addition(2,c);
+                Addition* ln_i = new Addition("\\ln(i)");
+                
+                exp.push_back(ln_i);
+                exp.push_back(ln_c);
+            }
+        }
+    }
+    
+    //Variable
+    {
+        vector<unsigned int> sum;
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            for(unsigned int j = 0; j < add[i]->variable.size() ; j++)
+            {
+                if(add[i]->variable[j])
+                {
+                    if(j >= sum.size())
+                    {
+                        //expand vector sum
+                        unsigned long original_size = sum.size();
+                        for(unsigned int k = 0; k < j-original_size ; k++)
+                        {
+                            sum.push_back(0);
+                        }
+                        sum.push_back(1);
+                    }
+                    else
+                    {
+                        sum[j]++;
+                    }
+                }
+            }
+            
+            add[i]->variable.clear();
+        }
+        
+        for(unsigned int i = 0; i < sum.size() ; i++)
+        {
+            if(sum[i] != 0)
+            {
+                if(sum[i] == 1)
+                {
+                    if(i >= variable.size())
+                    {
+                        //expand vector sum
+                        unsigned long original_size = variable.size();
+                        for(int k = 0; k < i-original_size ; k++)
+                        {
+                            variable.push_back(false);
+                        }
+                        variable.push_back(true);
+                    }
+                }
+                else
+                {
+                    Addition* c = new Addition(1,sum[i]);
+                    Addition* ln_c = new Addition(2,c);
+                    
+                    Addition* x = new Addition(2,i);
+                    Addition* ln_x = new Addition(2,x);
+                    
+                    exp.push_back(ln_c);
+                    exp.push_back(ln_x);
+                }
+            }
+        }
+    }
+    
+    //exp
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->exp.size() ; j++)
+        {
+            exp.push_back(add[i]->exp[j]);
+            add[i]->exp[j]->mother = this;
+        }
+        add[i]->exp.clear();
+    }
+    
+    //ln
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln.size() ; j++)
+        {
+            ln.push_back(add[i]->ln[j]);
+            add[i]->ln[j]->mother = this;
+        }
+        add[i]->ln.clear();
+    }
+    
+    //erase
+    eraseEmptyElement(add);
+    if(add.size() != 0)
+    {
+        cout<<"Error: cannot clean add"<<endl;
+    }
+    
+    if(isEmpty()) nZero = true;
+    
+    getTopmost()->print();
+}
+
+void Addition::simplification()
+{
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->simplification();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->simplification();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->simplification();
+    }
+    
+    print();
 }
