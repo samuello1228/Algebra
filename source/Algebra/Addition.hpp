@@ -45,7 +45,7 @@ public:
     //Constructor
     Addition();
     Addition(string latex);
-    Addition(int compositeType, Addition* operand); // 1 = exp, -1 = ln
+    Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln
     Addition(Addition* operand1, Addition* operand2); // addition
     ~Addition();
     

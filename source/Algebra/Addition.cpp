@@ -550,6 +550,107 @@ Addition::Addition(string latex)
     }
 }
 
+Addition::Addition(int compositeType, Addition* operand)
+{
+    operand->mother = this;
+    operand->motherType = compositeType;
+    
+    mother = nullptr;
+    motherType = 0;
+    
+    depth = operand->depth +1;
+    orderType = operand->orderType;
+    
+    if(orderType == 2)
+    {
+        if(compositeType == 1) order = operand->order +1;
+        else if(compositeType == 2) order = operand->order -1;
+    }
+    else order = 0;
+    
+    nZero = false;
+    nNegative = false;
+    positveInterger = 0;
+    nTau = false;
+    nComplex = false;
+    nInfinity = false;
+    
+    if(compositeType == 1) exp.push_back(operand);
+    else if(compositeType == 2) ln.push_back(operand);
+}
+
+Addition::Addition(Addition* operand1, Addition* operand2)
+{
+    operand1->mother = this;
+    operand1->motherType = 3;
+    operand2->mother = this;
+    operand2->motherType = 3;
+    
+    mother = nullptr;
+    motherType = 0;
+    
+    if(operand1->depth > operand2->depth) depth = operand1->depth +1;
+    else depth = operand2->depth +1;
+    
+    // |1 2 3
+    //-+------
+    //1|1 2 3
+    //2|2 ? 3
+    //3|3 3 3
+    
+    if(operand1->orderType == 3 || operand2->orderType == 3)
+    {
+        orderType = 3;
+        order = 0;
+    }
+    else if(operand1->orderType == 1 && operand2->orderType == 1)
+    {
+        orderType = 1;
+        order = 0;
+    }
+    else if(operand1->orderType == 2 && operand2->orderType == 1)
+    {
+        orderType = 2;
+        order = operand1->order;
+    }
+    else if(operand1->orderType == 2 && operand2->orderType == 1)
+    {
+        orderType = 2;
+        order = operand2->order;
+    }
+    else if(operand1->orderType == 2 && operand2->orderType == 2)
+    {
+        if(operand1->order == operand2->order)
+        {
+            orderType = 2;
+            order = operand1->order;
+        }
+        else
+        {
+            orderType = 3;
+            order = 0;
+        }
+    }
+    else
+    {
+        cout<<"Error: Impossible case"<<endl;
+    }
+    
+    nZero = false;
+    nNegative = false;
+    positveInterger = 0;
+    nTau = false;
+    nComplex = false;
+    nInfinity = false;
+    
+    add.push_back(operand1);
+    add.push_back(operand2);
+
+    sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
+        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+    });
+}
+
 Addition::~Addition()
 {
     for(unsigned int i = 0; i < exp.size() ; i++)
