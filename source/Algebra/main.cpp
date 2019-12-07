@@ -23,7 +23,7 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
-    //*
+    /*
     //test basicArithmetic
     Addition* test = new Addition("0");
     test->nNegative = true;
@@ -31,7 +31,7 @@ int main()
     test->print();
     test->basicArithmetic();
     delete test;
-    //*/
+    */
     
     /*
     //test cleanAdd
@@ -50,16 +50,14 @@ int main()
     delete test1;
     */
     
-    /*
+    //*
     //test explnCancellation
     //Addition* test = new Addition("\\exp(\\ln(x+1)) + \\exp(\\ln(x+1)) + y");
     Addition* test = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
     test->print();
-    test->cleanAdd();
-    test->explnCancellation();
     test->explnCancellation();
     delete test;
-    */
+    //*/
     
     //delete
     delete zero;

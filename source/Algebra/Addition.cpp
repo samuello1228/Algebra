@@ -1336,22 +1336,118 @@ void Addition::cleanAdd()
     }
 }
 
-void Addition::simplification()
+void Addition::explnCancellation()
 {
+    cleanAdd();
+    
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
-        exp[i]->simplification();
+        exp[i]->explnCancellation();
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
-        ln[i]->simplification();
+        ln[i]->explnCancellation();
     }
     
-    for(unsigned int i = 0; i < add.size() ; i++)
+    //\exp(\ln(x_1)) + \exp(\ln(x_2)) + y = x_1 + x_2 + y
+    bool isChanged = false;
+    int index = 0;
+    while(true)
     {
-        add[i]->simplification();
+        if(index >= exp.size()) break;
+        
+        if(exp[index]->nZero) {index++; continue;}
+        if(exp[index]->nNegative) {index++; continue;}
+        if(exp[index]->positveInterger != 0) {index++; continue;}
+        if(exp[index]->nTau) {index++; continue;}
+        if(exp[index]->nComplex) {index++; continue;}
+        if(exp[index]->nInfinity) {index++; continue;}
+        
+        bool nVariable = false;
+        for(unsigned int j = 0; j < exp[index]->variable.size() ; j++)
+        {
+            if(exp[index]->variable[j]) nVariable = true;
+        }
+        if(nVariable) {index++; continue;}
+        
+        if(exp[index]->exp.size() != 0) {index++; continue;}
+        if(exp[index]->add.size() != 0) {index++; continue;}
+        
+        if(exp[index]->ln.size() != 1) {index++; continue;}
+        
+        //move x to add
+        add.push_back(exp[index]->ln[0]);
+        exp[index]->ln[0]->mother = this;
+        exp[index]->ln[0]->motherType = 3;
+        
+        exp[index]->ln.clear();
+        delete exp[index];
+        exp.erase(exp.begin()+index);
+        
+        isChanged = true;
     }
     
-    print();
+    if(isChanged)
+    {
+        //not empty because add.push_back
+        cout<<"explnCancellation: \\exp(\\ln(x)) = x"<<endl;
+        getTopmost()->print();
+        cleanAdd();
+    }
+    isChanged = false;
+    
+    //For \exp(\ln(\exp(x_1)) + \ln(\exp(x_2)) + y) = \exp(x_1 + x_2 + y)
+    if(mother == nullptr) return;
+    if(motherType != 1) return;
+    
+    index = 0;
+    while(true)
+    {
+        if(index >= ln.size()) break;
+        
+        if(ln[index]->nZero) {index++; continue;}
+        if(ln[index]->nNegative) {index++; continue;}
+        if(ln[index]->positveInterger != 0) {index++; continue;}
+        if(ln[index]->nTau) {index++; continue;}
+        if(ln[index]->nComplex) {index++; continue;}
+        if(ln[index]->nInfinity) {index++; continue;}
+        
+        bool nVariable = false;
+        for(unsigned int j = 0; j < ln[index]->variable.size() ; j++)
+        {
+            if(ln[index]->variable[j]) nVariable = true;
+        }
+        if(nVariable) {index++; continue;}
+        
+        if(ln[index]->ln.size() != 0) {index++; continue;}
+        if(ln[index]->add.size() != 0) {index++; continue;}
+        
+        if(ln[index]->exp.size() != 1) {index++; continue;}
+        
+        //move x to add
+        add.push_back(ln[index]->exp[0]);
+        ln[index]->exp[0]->mother = this;
+        ln[index]->exp[0]->motherType = 3;
+        
+        ln[index]->exp.clear();
+        delete ln[index];
+        ln.erase(ln.begin()+index);
+        
+        isChanged = true;
+    }
+    
+    if(isChanged)
+    {
+        //not empty because add.push_back
+        cout<<"explnCancellation: \\ln(\\exp(x)) = x"<<endl;
+        getTopmost()->print();
+        cleanAdd();
+    }
+    isChanged = false;
+}
+
+void Addition::simplification()
+{
+    explnCancellation();
 }

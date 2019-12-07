@@ -58,6 +58,7 @@ public:
     Addition* getTopmost();
     void basicArithmetic();
     void cleanAdd();
+    void explnCancellation();
     void simplification();
 };
 
