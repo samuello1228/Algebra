@@ -223,6 +223,127 @@ Addition::Addition(string latex)
         
     }
     
+    //For \exp
+    if(trim.size() >= 5 && trim[0] == '\\' && trim[1] == 'e' && trim[2] == 'x' && trim[3] == 'p' && trim[4] == '(')
+    {
+        if(trim.size() <= 6)
+        {
+            cout<<"Syntax Error: the exp function does not have operand"<<endl;
+            return;
+        }
+        
+        unsigned int index = 5;
+        string operand_latex;
+        int parenthesisLevel = 0;
+        while(true)
+        {
+            operand_latex += trim[index];
+            if(trim[index] == '(') parenthesisLevel++;
+            else if(trim[index] == ')') parenthesisLevel--;
+            
+            if(index+1 == trim.size())
+            {
+                cout<<"Syntax Error: the exp function does not have right parenthesis"<<endl;
+                return;
+            }
+            else if(trim[index+1] == ')' && parenthesisLevel == 0)
+            {
+                if(trim.size() >= index+3)
+                {
+                    cout<<"Syntax Error: the exp function may have some left missing parenthesis"<<endl;
+                    return;
+                }
+                
+                //For exp(f(x))
+                Addition* operand = new Addition(operand_latex);
+                
+                operand->mother = this;
+                operand->motherType = 1;
+                
+                mother = nullptr;
+                motherType = 0;
+                
+                depth = operand->depth +1;
+                orderType = operand->orderType;
+                
+                if(orderType == 2) order = operand->order +1;
+                else order = 0;
+                
+                nZero = false;
+                nNegative = false;
+                positveInterger = 0;
+                nTau = false;
+                nComplex = false;
+                nInfinity = false;
+                
+                exp.push_back(operand);
+                return;
+            }
+            else index++;
+        }
+    }
+    
+    //For \ln
+    if(trim.size() >= 4 && trim[0] == '\\' && trim[1] == 'l' && trim[2] == 'n' && trim[3] == '(')
+    {
+        if(trim.size() <= 5)
+        {
+            cout<<"Syntax Error: the ln function does not have operand"<<endl;
+            return;
+        }
+        
+        unsigned int index = 4;
+        string operand_latex;
+        int parenthesisLevel = 0;
+        while(true)
+        {
+            operand_latex += trim[index];
+            if(trim[index] == '(') parenthesisLevel++;
+            else if(trim[index] == ')') parenthesisLevel--;
+            
+            if(index+1 == trim.size())
+            {
+                cout<<"Syntax Error: the ln function does not have right parenthesis"<<endl;
+                return;
+            }
+            else if(trim[index+1] == ')' && parenthesisLevel == 0)
+            {
+                if(trim.size() >= index+3)
+                {
+                    cout<<"Syntax Error: the ln function may have some left missing parenthesis"<<endl;
+                    return;
+                }
+                
+                //For ln(f(x))
+                Addition* operand = new Addition(operand_latex);
+                
+                operand->mother = this;
+                operand->motherType = 2;
+                
+                mother = nullptr;
+                motherType = 0;
+                
+                depth = operand->depth +1;
+                orderType = operand->orderType;
+                
+                if(orderType == 2) order = operand->order -1;
+                else order = 0;
+                
+                nZero = false;
+                nNegative = false;
+                positveInterger = 0;
+                nTau = false;
+                nComplex = false;
+                nInfinity = false;
+                
+                ln.push_back(operand);
+                return;
+            }
+            else index++;
+        }
+    }
+    
+    //For constant and variable
     if(trim.size() == 1 && trim[0] == '0')
     {
         //For 0
@@ -373,10 +494,9 @@ Addition::Addition(string latex)
         nInfinity = true;
         return;
     }
-    
-    //For positive integer
-    if(trim[0] != '0' && std::isdigit(trim[0]))
+    else if(trim[0] != '0' && std::isdigit(trim[0]))
     {
+        //For positive integer
         unsigned int index = 0;
         string positive_integer;
         while(true)
@@ -409,143 +529,6 @@ Addition::Addition(string latex)
             {
                 break;
             }
-        }
-    }
-    
-    if(trim[0] == '\\')
-    {
-        //For \exp and \ln
-        if(trim.size() <= 3)
-        {
-            cout<<"Syntax Error: the function need to be ln, exp or tau"<<endl;
-            return;
-        }
-        else if(trim[1] == 'l' && trim[2] == 'n' && trim[3] == '(')
-        {
-            //For \ln
-            if(trim.size() <= 5)
-            {
-                cout<<"Syntax Error: the ln function does not have operand"<<endl;
-                return;
-            }
-            
-            unsigned int index = 4;
-            string operand_latex;
-            int parenthesisLevel = 0;
-            while(true)
-            {
-                operand_latex += trim[index];
-                if(trim[index] == '(') parenthesisLevel++;
-                else if(trim[index] == ')') parenthesisLevel--;
-                
-                if(index+1 == trim.size())
-                {
-                    cout<<"Syntax Error: the ln function does not have right parenthesis"<<endl;
-                    return;
-                }
-                else if(trim[index+1] == ')' && parenthesisLevel == 0)
-                {
-                    if(trim.size() >= index+3)
-                    {
-                        cout<<"Syntax Error: the ln function may have some left missing parenthesis"<<endl;
-                        return;
-                    }
-                    
-                    //For ln(f(x))
-                    Addition* operand = new Addition(operand_latex);
-                    
-                    operand->mother = this;
-                    operand->motherType = 2;
-                    
-                    mother = nullptr;
-                    motherType = 0;
-                    
-                    depth = operand->depth +1;
-                    orderType = operand->orderType;
-                    
-                    if(orderType == 2) order = operand->order -1;
-                    else order = 0;
-                    
-                    nZero = false;
-                    nNegative = false;
-                    positveInterger = 0;
-                    nTau = false;
-                    nComplex = false;
-                    nInfinity = false;
-                    
-                    ln.push_back(operand);
-                    return;
-                }
-                else index++;
-            }
-        }
-        else if(trim.size() <= 4)
-        {
-            cout<<"Syntax Error: the function need to be ln, exp or tau"<<endl;
-            return;
-        }
-        else if(trim[1] == 'e' && trim[2] == 'x' && trim[3] == 'p' && trim[4] == '(')
-        {
-            //For \exp
-            if(trim.size() <= 6)
-            {
-                cout<<"Syntax Error: the exp function does not have operand"<<endl;
-                return;
-            }
-            unsigned int index = 5;
-            string operand_latex;
-            int parenthesisLevel = 0;
-            while(true)
-            {
-                operand_latex += trim[index];
-                if(trim[index] == '(') parenthesisLevel++;
-                else if(trim[index] == ')') parenthesisLevel--;
-                
-                if(index+1 == trim.size())
-                {
-                    cout<<"Syntax Error: the exp function does not have right parenthesis"<<endl;
-                    return;
-                }
-                else if(trim[index+1] == ')' && parenthesisLevel == 0)
-                {
-                    if(trim.size() >= index+3)
-                    {
-                        cout<<"Syntax Error: the exp function may have some left missing parenthesis"<<endl;
-                        return;
-                    }
-                    
-                    //For exp(f(x))
-                    Addition* operand = new Addition(operand_latex);
-                    
-                    operand->mother = this;
-                    operand->motherType = 1;
-                    
-                    mother = nullptr;
-                    motherType = 0;
-                    
-                    depth = operand->depth +1;
-                    orderType = operand->orderType;
-                    
-                    if(orderType == 2) order = operand->order +1;
-                    else order = 0;
-                    
-                    nZero = false;
-                    nNegative = false;
-                    positveInterger = 0;
-                    nTau = false;
-                    nComplex = false;
-                    nInfinity = false;
-                    
-                    exp.push_back(operand);
-                    return;
-                }
-                else index++;
-            }
-        }
-        else
-        {
-            cout<<"Syntax Error: the function need to be ln, exp or tau"<<endl;
-            return;
         }
     }
     
