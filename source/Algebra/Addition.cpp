@@ -915,6 +915,46 @@ void Addition::basicArithmetic()
         add[i]->basicArithmetic();
     }
     
+    if(nInfinity)
+    {
+        nInfinity = false;
+        if(isEmpty())
+        {
+            nInfinity = true;
+            return;
+        }
+        
+        nZero = false;
+        nNegative = false;
+        positveInterger = 0;
+        nTau = false;
+        nComplex = false;
+        nInfinity = true;
+        
+        for(unsigned int i = 0; i < exp.size() ; i++)
+        {
+            delete exp[i];
+        }
+        
+        for(unsigned int i = 0; i < ln.size() ; i++)
+        {
+            delete ln[i];
+        }
+        
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            delete add[i];
+        }
+        
+        exp.clear();
+        ln.clear();
+        add.clear();
+        
+        cout<<"basicArithmetic: -inf + x = -inf"<<endl;
+        getTopmost()->print();
+        return;
+    }
+    
     if(nZero)
     {
         nZero = false;
