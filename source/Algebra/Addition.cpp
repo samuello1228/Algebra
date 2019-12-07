@@ -80,6 +80,40 @@ void eraseEmptyElement(vector<Addition*>& list)
     }
 }
 
+void updateDepthOrder(unsigned int& depth1, unsigned int& orderType1, int& order1,
+                   unsigned int depth2, unsigned int orderType2, int order2)
+{
+    if(depth2 > depth1) depth1 = depth2;
+    
+    // |1 2 3
+    //-+------
+    //1|1 2 3
+    //2|2 ? 3
+    //3|3 3 3
+    
+    if(orderType1 == 1)
+    {
+        orderType1 = orderType2;
+        if(orderType2 == 2) order1 = order2;
+    }
+    else if(orderType1 == 2)
+    {
+        if(orderType2 == 2)
+        {
+            if(order1 != order2)
+            {
+                orderType1 = 3;
+                order1 = 0;
+            }
+        }
+        else if(orderType2 == 3)
+        {
+            orderType1 = 3;
+            order1 = 0;
+        }
+    }
+}
+
 Addition::Addition()
 {
     mother = nullptr;
@@ -160,8 +194,9 @@ Addition::Addition(string latex)
         {
             //For f(x) + g(x)
             
-            depth = 0;
-            orderType = 0;
+            depth = 1;
+            orderType = 1;
+            order = 0;
             for(unsigned int i = 0; i < operand_latex_list.size() ; i++)
             {
                 Addition* operand = new Addition(operand_latex_list[i]);
@@ -172,37 +207,7 @@ Addition::Addition(string latex)
                 mother = nullptr;
                 motherType = 0;
                 
-                if(operand->depth +1 > depth) depth = operand->depth +1;
-                
-                if(orderType == 0)
-                {
-                    //initialization
-                    orderType = operand->orderType;
-                    
-                    if(operand->orderType == 2) order = operand->order;
-                    else order = 0;
-                }
-                else if(orderType == 1)
-                {
-                    orderType = operand->orderType;
-                    if(operand->orderType == 2) order = operand->order;
-                }
-                else if(orderType == 2)
-                {
-                    if(operand->orderType == 2)
-                    {
-                        if(order != operand->order)
-                        {
-                            orderType = 3;
-                            order = 0;
-                        }
-                    }
-                    else if(operand->orderType == 3)
-                    {
-                        orderType = 3;
-                        order = 0;
-                    }
-                }
+                updateDepthOrder(depth, orderType, order, operand->depth +1, operand->orderType, operand->order);
                 
                 nZero = false;
                 nNegative = false;
@@ -898,6 +903,45 @@ Addition* Addition::getTopmost()
     }
 }
 
+void Addition::fillDepthOrder()
+{
+    if(isEmpty())
+    {
+        cout<<"Error: the expression is empty"<<endl;
+        return;
+    }
+    
+    depth = 1;
+    orderType = 1;
+    order = 0;
+    
+    bool existVariable = false;
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) existVariable = true;
+    }
+    
+    if(existVariable) updateDepthOrder(depth,orderType,order,1,2,0);
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order +1);
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order);
+    }
+}
+
 void Addition::basicArithmetic()
 {
     for(unsigned int i = 0; i < exp.size() ; i++)
@@ -1334,6 +1378,7 @@ void Addition::cleanAdd()
         add[i]->exp.clear();
     }
     
+    fillDepthOrder();
     sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
         return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
     });
@@ -1358,6 +1403,7 @@ void Addition::cleanAdd()
         add[i]->ln.clear();
     }
     
+    fillDepthOrder();
     sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
     return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
     });
