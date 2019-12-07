@@ -898,6 +898,66 @@ Addition* Addition::getTopmost()
     }
 }
 
+void Addition::basicArithmetic()
+{
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->basicArithmetic();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->basicArithmetic();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->basicArithmetic();
+    }
+    
+    if(nZero)
+    {
+        nZero = false;
+        if(isEmpty())
+        {
+            nZero = true;
+            return;
+        }
+        else
+        {
+            cout<<"basicArithmetic: 0 + x = x"<<endl;
+            getTopmost()->print();
+        }
+    }
+    
+    if(nNegative && positveInterger >= 1)
+    {
+        //because it is not empty, nZero must be false
+        if(positveInterger == 1)
+        {
+            nNegative = false;
+            positveInterger = 0;
+            
+            if(isEmpty())
+            {
+                nZero = true;
+                cout<<"basicArithmetic: 1 + (-1) = 0"<<endl;
+                getTopmost()->print();
+                return;
+            }
+        }
+        else
+        {
+            nNegative = false;
+            positveInterger--;
+            
+            cout<<"basicArithmetic: x + (-1)"<<endl;
+            getTopmost()->print();
+            return;
+        }
+    }
+}
+
 void Addition::cleanAdd()
 {
     for(unsigned int i = 0; i < add.size() ; i++)

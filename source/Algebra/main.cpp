@@ -23,19 +23,43 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
-    //test
-    //Addition* test = new Addition("((2) + (-1)) + ((-1) + (0))");
-    //Addition* test = new Addition("((-1) + (-1)) + ((-1) + (0))");
-    //Addition* test = new Addition("((1) + (-1)) + ((0) + (0))");
-    //Addition* test = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
-    //Addition* test = new Addition("((i) + (i)) + ((i) + (0))");
-    //Addition* test = new Addition("((-\\infty) + (-\\infty)) + ((-\\infty) + (x))");
-    //Addition* test = new Addition("((x) + (z) + (z) + (x) + (z))");
-    //Addition* test = new Addition("(\\exp(x) + \\exp(z)) + (\\exp(z) + \\exp(x) + \\exp(z))");
-    Addition* test = new Addition("(\\ln(x) + \\ln(z)) + (\\ln(z) + \\ln(x) + \\ln(z))");
+    //*
+    //test basicArithmetic
+    Addition* test = new Addition("0");
+    test->nNegative = true;
+    test->positveInterger = 1;
+    test->print();
+    test->basicArithmetic();
+    delete test;
+    //*/
+    
+    /*
+    //test cleanAdd
+    //Addition* test1 = new Addition("2"); Addition* test2 = new Addition("((2) + (-1)) + ((-1) + (0))");
+    //Addition* test1 = new Addition("\\tau"); Addition* test2 = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
+    //Addition* test1 = new Addition("i"); Addition* test2 = new Addition("((i) + (i)) + ((i) + (0))");
+    //Addition* test1 = new Addition("-\\infty"); Addition* test2 = new Addition("((-\\infty) + (-\\infty)) + ((-\\infty) + (x))");
+    //Addition* test1 = new Addition("y"); Addition* test2 = new Addition("((x) + (z) + (z) + (x) + (z))");
+    //Addition* test1 = new Addition("\\exp(x)"); Addition* test2 = new Addition("(\\exp(x) + \\exp(z)) + (\\exp(z) + \\exp(x) + \\exp(z))");
+    Addition* test1 = new Addition("\\ln(x)"); Addition* test2 = new Addition("(\\ln(x) + \\ln(z)) + (\\ln(z) + \\ln(x) + \\ln(z))");
+    test1->add.push_back(test2);
+    test2->mother = test1;
+    test2->motherType = 3;
+    test1->print();
+    test1->cleanAdd();
+    delete test1;
+    */
+    
+    /*
+    //test explnCancellation
+    //Addition* test = new Addition("\\exp(\\ln(x+1)) + \\exp(\\ln(x+1)) + y");
+    Addition* test = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
     test->print();
     test->cleanAdd();
+    test->explnCancellation();
+    test->explnCancellation();
     delete test;
+    */
     
     //delete
     delete zero;

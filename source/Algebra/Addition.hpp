@@ -56,6 +56,7 @@ public:
     Addition* getCopy();
     bool isEmpty();
     Addition* getTopmost();
+    void basicArithmetic();
     void cleanAdd();
     void simplification();
 };
