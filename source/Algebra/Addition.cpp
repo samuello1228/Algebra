@@ -942,6 +942,69 @@ void Addition::fillDepthOrder()
     }
 }
 
+bool Addition::haveOnlyNegativeOne()
+{
+    if(nZero) return false;
+    if(!nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
+bool Addition::haveOnlyPositveInterger()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger == 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
+bool Addition::haveOnlyComplex()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(!nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
 void Addition::basicArithmetic()
 {
     for(unsigned int i = 0; i < exp.size() ; i++)
@@ -1533,6 +1596,226 @@ void Addition::explnCancellation()
         cleanAdd();
     }
     isChanged = false;
+}
+
+void Addition::basicMultiplication()
+{
+    explnCancellation();
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->basicMultiplication();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->basicMultiplication();
+    }
+    
+    fillDepthOrder();
+    
+    sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
+    return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+    });
+    
+    int index1 = 0;
+    while(true)
+    {
+        if(index1 >= exp.size()) break;
+        
+        //check whether the expression need to be simplified
+        {
+            int count_one = 0;
+            int count_n1 = 0;
+            int count_i = 0;
+            int count_c = 0;
+            for(unsigned int j = 0; j < exp[index1]->ln.size() ; j++)
+            {
+                if(exp[index1]->ln[j]->haveOnlyNegativeOne())
+                {
+                    count_n1++;
+                }
+                else if(exp[index1]->ln[j]->haveOnlyPositveInterger())
+                {
+                    if(exp[index1]->ln[j]->positveInterger == 1)
+                    {
+                        count_one++;
+                    }
+                    else
+                    {
+                        count_c++;
+                    }
+                }
+                else if(exp[index1]->ln[j]->haveOnlyComplex())
+                {
+                    count_i++;
+                }
+            }
+            
+            if(count_one == 0 && count_n1 <= 1 && count_i <= 1 && count_c <= 1)
+            {
+                index1++;
+                continue;
+            }
+        }
+        
+        int product = 1;
+        int sum_complex = 0;
+        int index2 = 0;
+        while(true)
+        {
+            if(index2 >= exp[index1]->ln.size()) break;
+            
+            if(exp[index1]->ln[index2]->haveOnlyNegativeOne())
+            {
+                product *= -1;
+                
+                delete exp[index1]->ln[index2];
+                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
+            }
+            else if(exp[index1]->ln[index2]->haveOnlyPositveInterger())
+            {
+                product *= exp[index1]->ln[index2]->positveInterger;
+                
+                delete exp[index1]->ln[index2];
+                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
+            }
+            else if(exp[index1]->ln[index2]->haveOnlyComplex())
+            {
+                sum_complex++;
+                
+                delete exp[index1]->ln[index2];
+                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
+            }
+            else index2++;
+        }
+        
+        //create result
+        sum_complex = sum_complex % 4;
+        if(sum_complex == 2)
+        {
+            sum_complex = 0;
+            product *= -1;
+        }
+        else if(sum_complex == 3)
+        {
+            sum_complex = 1;
+            product *= -1;
+        }
+        
+        if(sum_complex == 1)
+        {
+            Addition* complex_i = new Addition("i");
+            
+            exp[index1]->ln.push_back(complex_i);
+            complex_i->mother = exp[index1];
+            complex_i->motherType = 2;
+        }
+        
+        if(product == 1)
+        {
+            if(exp[index1]->isEmpty())
+            {
+                delete exp[index1];
+                exp.erase(exp.begin()+index1);
+            }
+            
+            if(isEmpty())
+            {
+                nZero = true;
+                cout<<"basicMultiplication"<<endl;
+                getTopmost()->print();
+                return;
+            }
+            else
+            {
+                cout<<"basicMultiplication"<<endl;
+                getTopmost()->print();
+                continue;
+            }
+        }
+        else if(product >= 2)
+        {
+            Addition* c = new Addition(1,product);
+            
+            exp[index1]->ln.push_back(c);
+            c->mother = exp[index1];
+            c->motherType = 2;
+        }
+        else if(product == -1)
+        {
+            Addition* n1 = new Addition("-1");
+            
+            exp[index1]->ln.push_back(n1);
+            n1->mother = exp[index1];
+            n1->motherType = 2;
+        }
+        else if(product <= -2)
+        {
+            Addition* n1 = new Addition("-1");
+            Addition* c = new Addition(1,-product);
+            
+            exp[index1]->ln.push_back(n1);
+            n1->mother = exp[index1];
+            n1->motherType = 2;
+            
+            exp[index1]->ln.push_back(c);
+            c->mother = exp[index1];
+            c->motherType = 2;
+        }
+        
+        cout<<"basicMultiplication"<<endl;
+        getTopmost()->print();
+        index1++;
+    }
+}
+
+void Addition::addCommonTerm()
+{
+    cleanAdd();
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->addCommonTerm();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->addCommonTerm();
+    }
+    
+    fillDepthOrder();
+    
+    //c >= 2
+    //Type 1: x = ln(x)
+    //x + x = \exp(\ln(2) + \ln(x))
+    
+    //Type 2: x = positiveInteger, (-1), tau, i, x, y, z, ln(x)
+    //x + \exp(\ln(-1)          + \ln(x)) = 0
+    //x + \exp(          \ln(c) + \ln(x)) = \exp(          \ln(c+1) + \ln(x))
+    //x + \exp(\ln(-1) + \ln(c) + \ln(x)) = \exp(\ln(-1) + \ln(c-1) + \ln(x))
+    
+    //Type 3: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
+    //\exp(                     x) + \exp(                   + x) = \exp(          \ln(2)       + x)
+    //\exp(                     x) + \exp(\ln(-1)            + x) = 0
+    //\exp(                     x) + \exp(          \ln(c)   + x) = \exp(          \ln(c+1)     + x)
+    //\exp(                     x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c-1)     + x)
+    
+    //\exp(\ln(-1)            + x) + \exp(\ln(-1)            + x) = \exp(\ln(-1) + \ln(2)       + x)
+    //\exp(\ln(-1)            + x) + \exp(          \ln(c)   + x) = \exp(          \ln(c-1)     + x)
+    //\exp(\ln(-1)            + x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c+1)     + x)
+    
+    //\exp(          \ln(c_1) + x) + \exp(          \ln(c_2) + x) = \exp(          \ln(c_1+c_2) + x)
+    //\exp(          \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(          \ln(c_1-c_2) + x)
+    //                                                              \exp(\ln(-1) + \ln(c_2-c_1) + x)
+    
+    //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
+    
+    //For Type 1
+    
+    //For Type 2
+    
+    //For Type 3
 }
 
 void Addition::simplification()

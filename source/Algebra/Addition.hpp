@@ -39,7 +39,7 @@ public:
     
     //Composite
     vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
-    vector<Addition*> ln; //List: In(x1) + In(x2) + ...
+    vector<Addition*> ln; //List: ln(x1) + ln(x2) + ...
     vector<Addition*> add; //List: x1 + x2
     
     //Constructor
@@ -57,10 +57,16 @@ public:
     bool isEmpty();
     Addition* getTopmost();
     void fillDepthOrder();
+    bool haveOnlyNegativeOne();
+    bool haveOnlyPositveInterger();
+    bool haveOnlyComplex();
     
     void basicArithmetic();
     void cleanAdd();
     void explnCancellation();
+    
+    void basicMultiplication();
+    void addCommonTerm();
     void simplification();
 };
 
