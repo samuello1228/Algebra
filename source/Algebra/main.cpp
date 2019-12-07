@@ -26,6 +26,7 @@ int main()
     //test
     //Addition* test = new Addition("((2) + (-1)) + ((-1) + (0))");
     //Addition* test = new Addition("((-1) + (-1)) + ((-1) + (0))");
+    //Addition* test = new Addition("((1) + (-1)) + ((0) + (0))");
     //Addition* test = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
     //Addition* test = new Addition("((i) + (i)) + ((i) + (0))");
     //Addition* test = new Addition("((-\\infty) + (-\\infty)) + ((-\\infty) + (x))");

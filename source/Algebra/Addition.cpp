@@ -820,11 +820,8 @@ string Addition::getLatex()
     else output.erase(0,3);
     
     //erase "(" and ")"
-    while(true)
-    {
-        bool isErase = eraseParenthesis(output);
-        if(!isErase) break;
-    }
+    if(output == "(-1)") output = "-1";
+    else if(output == "(-\\infty)") output = "-\\infty";
     
     return output;
 }
@@ -943,58 +940,88 @@ void Addition::cleanAdd()
         
         nInfinity = true;
         
+        cout<<"cleanAdd: -inf"<<endl;
         getTopmost()->print();
         return;
     }
     
+    bool isChanged = false;
     //zero
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        add[i]->nZero = false;
+        if(add[i]->nZero)
+        {
+            add[i]->nZero = false;
+            isChanged = true;
+        }
     }
     
     //positveInterger
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        positveInterger += add[i]->positveInterger;
-        add[i]->positveInterger = 0;
+        if(add[i]->positveInterger != 0)
+        {
+            positveInterger += add[i]->positveInterger;
+            add[i]->positveInterger = 0;
+            isChanged = true;
+        }
     }
     
     //negative
     {
-        int negativeSum = 0;
+        unsigned int negativeSum = 0;
         for(unsigned int i = 0; i < add.size() ; i++)
         {
-            if(add[i]->nNegative) negativeSum++;
-            add[i]->nNegative = false;
+            if(add[i]->nNegative)
+            {
+                negativeSum++;
+                add[i]->nNegative = false;
+                isChanged = true;
+            }
         }
         
-        if(negativeSum <= positveInterger)
+        if(negativeSum != 0)
         {
-            positveInterger = positveInterger - negativeSum;
-        }
-        else if(negativeSum - positveInterger == 1)
-        {
-            nNegative = true;
-        }
-        else
-        {
-            Addition* c = new Addition(1,negativeSum - positveInterger);
-            Addition* ln_c = new Addition(2,c);
-            Addition* ln_n1 = new Addition("\\ln(-1)");
-            
-            exp.push_back(ln_n1);
-            exp.push_back(ln_c);
+            if(negativeSum <= positveInterger)
+            {
+                positveInterger = positveInterger - negativeSum;
+            }
+            else if(negativeSum - positveInterger == 1)
+            {
+                nNegative = true;
+            }
+            else
+            {
+                Addition* c = new Addition(1,negativeSum - positveInterger);
+                Addition* ln_c = new Addition(2,c);
+                Addition* ln_n1 = new Addition("\\ln(-1)");
+                
+                exp.push_back(ln_c);
+                exp.push_back(ln_n1);
+            }
         }
     }
+    
+    if(isChanged)
+    {
+        cout<<"cleanAdd: interger"<<endl;
+        eraseEmptyElement(add);
+        if(isEmpty()) nZero = true;
+        getTopmost()->print();
+    }
+    isChanged = false;
     
     //tau
     {
         unsigned int sum = 0;
         for(unsigned int i = 0; i < add.size() ; i++)
         {
-            if(add[i]->nTau) sum++;
-            add[i]->nTau = false;
+            if(add[i]->nTau)
+            {
+                sum++;
+                add[i]->nTau = false;
+                isChanged = true;
+            }
         }
         
         if(sum != 0)
@@ -1009,19 +1036,31 @@ void Addition::cleanAdd()
                 Addition* ln_c = new Addition(2,c);
                 Addition* ln_tau = new Addition("\\ln(\\tau)");
                 
-                exp.push_back(ln_tau);
                 exp.push_back(ln_c);
+                exp.push_back(ln_tau);
             }
         }
     }
+    
+    if(isChanged)
+    {
+        cout<<"cleanAdd: tau"<<endl;
+        eraseEmptyElement(add);
+        getTopmost()->print();
+    }
+    isChanged = false;
     
     //i
     {
         unsigned int sum = 0;
         for(unsigned int i = 0; i < add.size() ; i++)
         {
-            if(add[i]->nComplex) sum++;
-            add[i]->nComplex = false;
+            if(add[i]->nComplex)
+            {
+                sum++;
+                add[i]->nComplex = false;
+                isChanged = true;
+            }
         }
         
         if(sum != 0)
@@ -1036,11 +1075,19 @@ void Addition::cleanAdd()
                 Addition* ln_c = new Addition(2,c);
                 Addition* ln_i = new Addition("\\ln(i)");
                 
-                exp.push_back(ln_i);
                 exp.push_back(ln_c);
+                exp.push_back(ln_i);
             }
         }
     }
+    
+    if(isChanged)
+    {
+        cout<<"cleanAdd: i"<<endl;
+        eraseEmptyElement(add);
+        getTopmost()->print();
+    }
+    isChanged = false;
     
     //Variable
     {
@@ -1065,6 +1112,8 @@ void Addition::cleanAdd()
                     {
                         sum[j]++;
                     }
+                    
+                    isChanged = true;
                 }
             }
             
@@ -1103,6 +1152,14 @@ void Addition::cleanAdd()
         }
     }
     
+    if(isChanged)
+    {
+        cout<<"cleanAdd: variable"<<endl;
+        eraseEmptyElement(add);
+        getTopmost()->print();
+    }
+    isChanged = false;
+    
     //exp
     for(unsigned int i = 0; i < add.size() ; i++)
     {
@@ -1110,9 +1167,22 @@ void Addition::cleanAdd()
         {
             exp.push_back(add[i]->exp[j]);
             add[i]->exp[j]->mother = this;
+            isChanged = true;
         }
         add[i]->exp.clear();
     }
+    
+    sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
+        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+    });
+    
+    if(isChanged)
+    {
+        cout<<"cleanAdd: exp"<<endl;
+        eraseEmptyElement(add);
+        getTopmost()->print();
+    }
+    isChanged = false;
     
     //ln
     for(unsigned int i = 0; i < add.size() ; i++)
@@ -1121,20 +1191,27 @@ void Addition::cleanAdd()
         {
             ln.push_back(add[i]->ln[j]);
             add[i]->ln[j]->mother = this;
+            isChanged = true;
         }
         add[i]->ln.clear();
     }
     
-    //erase
-    eraseEmptyElement(add);
+    sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
+    return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+    });
+    
+    if(isChanged)
+    {
+        cout<<"cleanAdd: ln"<<endl;
+        eraseEmptyElement(add);
+        getTopmost()->print();
+    }
+    isChanged = false;
+    
     if(add.size() != 0)
     {
         cout<<"Error: cannot clean add"<<endl;
     }
-    
-    if(isEmpty()) nZero = true;
-    
-    getTopmost()->print();
 }
 
 void Addition::simplification()
