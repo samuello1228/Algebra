@@ -932,13 +932,13 @@ void Addition::fillDepthOrder()
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         ln[i]->fillDepthOrder();
-        updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order -1);
+        updateDepthOrder(depth,orderType,order, ln[i]->depth +1, ln[i]->orderType, ln[i]->order -1);
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
     {
         add[i]->fillDepthOrder();
-        updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order);
+        updateDepthOrder(depth,orderType,order, add[i]->depth +1, add[i]->orderType, add[i]->order);
     }
 }
 
@@ -1378,14 +1378,15 @@ void Addition::cleanAdd()
         add[i]->exp.clear();
     }
     
-    fillDepthOrder();
-    sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
-        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-    });
-    
     if(isChanged)
     {
         eraseEmptyElement(add);
+        fillDepthOrder();
+        
+        sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
+            return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+        });
+        
         cout<<"cleanAdd: exp"<<endl;
         getTopmost()->print();
     }
@@ -1403,14 +1404,15 @@ void Addition::cleanAdd()
         add[i]->ln.clear();
     }
     
-    fillDepthOrder();
-    sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
-    return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-    });
-    
     if(isChanged)
     {
         eraseEmptyElement(add);
+        fillDepthOrder();
+        
+        sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
+        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+        });
+        
         cout<<"cleanAdd: ln"<<endl;
         getTopmost()->print();
     }
