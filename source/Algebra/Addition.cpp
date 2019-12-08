@@ -341,7 +341,11 @@ Addition::Addition(string latex)
                 nComplex = false;
                 nInfinity = false;
                 
-                ln.push_back(operand);
+                if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
+                else if(operand->haveOnlyPositveInterger()) ln_c.push_back(operand);
+                else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
+                else ln.push_back(operand);
+                
                 return;
             }
             else index++;
@@ -631,7 +635,13 @@ Addition::Addition(int compositeType, Addition* operand)
     nInfinity = false;
     
     if(compositeType == 1) exp.push_back(operand);
-    else if(compositeType == 2) ln.push_back(operand);
+    else if(compositeType == 2)
+    {
+        if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
+        else if(operand->haveOnlyPositveInterger()) ln_c.push_back(operand);
+        else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
+        else ln.push_back(operand);
+    }
 }
 
 Addition::Addition(Addition* operand1, Addition* operand2)
@@ -713,6 +723,21 @@ Addition::~Addition()
         delete exp[i];
     }
     
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        delete ln_n1[i];
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        delete ln_c[i];
+    }
+    
+    for(unsigned int i = 0; i < ln_i.size() ; i++)
+    {
+        delete ln_i[i];
+    }
+    
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         delete ln[i];
@@ -785,6 +810,27 @@ string Addition::getLatex()
         output += ")";
     }
     
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        output += " + \\ln(";
+        output += ln_n1[i]->getLatex();
+        output += ")";
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        output += " + \\ln(";
+        output += ln_c[i]->getLatex();
+        output += ")";
+    }
+    
+    for(unsigned int i = 0; i < ln_i.size() ; i++)
+    {
+        output += " + \\ln(";
+        output += ln_i[i]->getLatex();
+        output += ")";
+    }
+    
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         output += " + \\ln(";
@@ -851,6 +897,33 @@ Addition* Addition::getCopy()
         copy->exp.push_back(element);
     }
     
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        Addition* element = ln_n1[i]->getCopy();
+        element->mother = this;
+        element->motherType = 2;
+        
+        copy->ln_n1.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        Addition* element = ln_c[i]->getCopy();
+        element->mother = this;
+        element->motherType = 2;
+        
+        copy->ln_c.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln_i.size() ; i++)
+    {
+        Addition* element = ln_i[i]->getCopy();
+        element->mother = this;
+        element->motherType = 2;
+        
+        copy->ln_i.push_back(element);
+    }
+    
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         Addition* element = ln[i]->getCopy();
@@ -870,27 +943,6 @@ Addition* Addition::getCopy()
     }
     
     return copy;
-}
-
-bool Addition::isEmpty()
-{
-    if(nZero) return false;
-    if(nNegative) return false;
-    if(positveInterger != 0) return false;
-    if(nTau) return false;
-    if(nComplex) return false;
-    if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
-    
-    return true;
 }
 
 Addition* Addition::getTopmost()
@@ -929,6 +981,24 @@ void Addition::fillDepthOrder()
         updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order +1);
     }
     
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        ln_n1[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_n1[i]->depth +1, ln_n1[i]->orderType, ln_n1[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        ln_c[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_c[i]->depth +1, ln_c[i]->orderType, ln_c[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < ln_i.size() ; i++)
+    {
+        ln_i[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_i[i]->depth +1, ln_i[i]->orderType, ln_i[i]->order -1);
+    }
+    
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         ln[i]->fillDepthOrder();
@@ -940,6 +1010,30 @@ void Addition::fillDepthOrder()
         add[i]->fillDepthOrder();
         updateDepthOrder(depth,orderType,order, add[i]->depth +1, add[i]->orderType, add[i]->order);
     }
+}
+
+bool Addition::isEmpty()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
 }
 
 bool Addition::haveOnlyZero()
@@ -957,6 +1051,9 @@ bool Addition::haveOnlyZero()
     }
     
     if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
     
@@ -978,6 +1075,9 @@ bool Addition::haveOnlyNegativeOne()
     }
     
     if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
     
@@ -999,6 +1099,9 @@ bool Addition::haveOnlyPositveInterger()
     }
     
     if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
     
@@ -1020,6 +1123,9 @@ bool Addition::haveOnlyComplex()
     }
     
     if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
     

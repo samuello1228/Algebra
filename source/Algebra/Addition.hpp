@@ -39,7 +39,10 @@ public:
     
     //Composite
     vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
-    vector<Addition*> ln; //List: ln(x1) + ln(x2) + ...
+    vector<Addition*> ln_n1; //List: ln(-1) + ln(-1) + ...
+    vector<Addition*> ln_c; //List: ln(c1) + ln(c2) + ...
+    vector<Addition*> ln_i; //List: ln(i) + ln(i) + ...
+    vector<Addition*> ln; //List of other: ln(x1) + ln(x2) + ...
     vector<Addition*> add; //List: x1 + x2
     
     //Constructor
@@ -54,9 +57,10 @@ public:
     void print();
     
     Addition* getCopy();
-    bool isEmpty();
     Addition* getTopmost();
     void fillDepthOrder();
+    
+    bool isEmpty();
     bool haveOnlyZero();
     bool haveOnlyNegativeOne();
     bool haveOnlyPositveInterger();
