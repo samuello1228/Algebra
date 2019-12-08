@@ -63,11 +63,12 @@ int main()
     //test basicMultiplication
     //Addition* test = new Addition("\\exp( \\ln(-1) + \\ln(2) ) + \\exp( \\ln(-1) + \\ln(2) )");
     //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1))");
-    //Addition* test = new Addition("\\exp( \\ln(2) + \\ln(-1) + \\ln(i) + \\ln(i) + \\ln(i)) + \\exp( \\ln(-1) + \\ln(-1) + \\ln(2) + \\ln(2) )");
+    //Addition* test = new Addition("\\exp( \\ln(2) + \\ln(i) + \\ln(i) + \\ln(i)) + \\exp( \\ln(-1) + \\ln(-1) + \\ln(2) + \\ln(2) )");
     Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1)) + \\exp( \\ln(i) + \\ln(i) + \\ln(i) + \\ln(i) )");
     
     test->print();
     test->basicMultiplication();
+    test->exp0();
     delete test;
     //*/
     

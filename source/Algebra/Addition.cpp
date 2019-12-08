@@ -942,6 +942,27 @@ void Addition::fillDepthOrder()
     }
 }
 
+bool Addition::haveOnlyZero()
+{
+    if(!nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
 bool Addition::haveOnlyNegativeOne()
 {
     if(nZero) return false;
@@ -1607,167 +1628,178 @@ void Addition::basicMultiplication()
         exp[i]->basicMultiplication();
     }
     
-    for(unsigned int i = 0; i < ln.size() ; i++)
+    if(mother == nullptr) return;
+    else if(motherType != 1) return;
+    
+    //check whether the expression need to be simplified
     {
-        ln[i]->basicMultiplication();
+        int count_one = 0;
+        int count_n1 = 0;
+        int count_i = 0;
+        int count_c = 0;
+        for(unsigned int j = 0; j < ln.size() ; j++)
+        {
+            if(ln[j]->haveOnlyNegativeOne())
+            {
+                count_n1++;
+            }
+            else if(ln[j]->haveOnlyPositveInterger())
+            {
+                if(ln[j]->positveInterger == 1)
+                {
+                    count_one++;
+                }
+                else
+                {
+                    count_c++;
+                }
+            }
+            else if(ln[j]->haveOnlyComplex())
+            {
+                count_i++;
+            }
+        }
+        
+        if(count_one == 0 && count_n1 <= 1 && count_i <= 1 && count_c <= 1)
+        {
+            return;
+        }
     }
     
-    fillDepthOrder();
-    
-    sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
-    return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-    });
-    
-    int index1 = 0;
+    int product = 1;
+    int sum_complex = 0;
+    int index = 0;
     while(true)
     {
-        if(index1 >= exp.size()) break;
+        if(index >= ln.size()) break;
         
-        //check whether the expression need to be simplified
+        if(ln[index]->haveOnlyNegativeOne())
         {
-            int count_one = 0;
-            int count_n1 = 0;
-            int count_i = 0;
-            int count_c = 0;
-            for(unsigned int j = 0; j < exp[index1]->ln.size() ; j++)
-            {
-                if(exp[index1]->ln[j]->haveOnlyNegativeOne())
-                {
-                    count_n1++;
-                }
-                else if(exp[index1]->ln[j]->haveOnlyPositveInterger())
-                {
-                    if(exp[index1]->ln[j]->positveInterger == 1)
-                    {
-                        count_one++;
-                    }
-                    else
-                    {
-                        count_c++;
-                    }
-                }
-                else if(exp[index1]->ln[j]->haveOnlyComplex())
-                {
-                    count_i++;
-                }
-            }
-            
-            if(count_one == 0 && count_n1 <= 1 && count_i <= 1 && count_c <= 1)
-            {
-                index1++;
-                continue;
-            }
-        }
-        
-        int product = 1;
-        int sum_complex = 0;
-        int index2 = 0;
-        while(true)
-        {
-            if(index2 >= exp[index1]->ln.size()) break;
-            
-            if(exp[index1]->ln[index2]->haveOnlyNegativeOne())
-            {
-                product *= -1;
-                
-                delete exp[index1]->ln[index2];
-                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
-            }
-            else if(exp[index1]->ln[index2]->haveOnlyPositveInterger())
-            {
-                product *= exp[index1]->ln[index2]->positveInterger;
-                
-                delete exp[index1]->ln[index2];
-                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
-            }
-            else if(exp[index1]->ln[index2]->haveOnlyComplex())
-            {
-                sum_complex++;
-                
-                delete exp[index1]->ln[index2];
-                exp[index1]->ln.erase(exp[index1]->ln.begin()+index2);
-            }
-            else index2++;
-        }
-        
-        //create result
-        sum_complex = sum_complex % 4;
-        if(sum_complex == 2)
-        {
-            sum_complex = 0;
             product *= -1;
-        }
-        else if(sum_complex == 3)
-        {
-            sum_complex = 1;
-            product *= -1;
-        }
-        
-        if(sum_complex == 1)
-        {
-            Addition* complex_i = new Addition("i");
             
-            exp[index1]->ln.push_back(complex_i);
-            complex_i->mother = exp[index1];
-            complex_i->motherType = 2;
+            delete ln[index];
+            ln.erase(ln.begin()+index);
         }
-        
-        if(product == 1)
+        else if(ln[index]->haveOnlyPositveInterger())
         {
-            if(exp[index1]->isEmpty())
-            {
-                delete exp[index1];
-                exp.erase(exp.begin()+index1);
-            }
+            product *= ln[index]->positveInterger;
             
-            if(isEmpty())
-            {
-                nZero = true;
-                cout<<"basicMultiplication"<<endl;
-                getTopmost()->print();
-                return;
-            }
-            else
-            {
-                cout<<"basicMultiplication"<<endl;
-                getTopmost()->print();
-                continue;
-            }
+            delete ln[index];
+            ln.erase(ln.begin()+index);
         }
-        else if(product >= 2)
+        else if(ln[index]->haveOnlyComplex())
         {
-            Addition* c = new Addition(1,product);
+            sum_complex++;
             
-            exp[index1]->ln.push_back(c);
-            c->mother = exp[index1];
-            c->motherType = 2;
+            delete ln[index];
+            ln.erase(ln.begin()+index);
         }
-        else if(product == -1)
-        {
-            Addition* n1 = new Addition("-1");
-            
-            exp[index1]->ln.push_back(n1);
-            n1->mother = exp[index1];
-            n1->motherType = 2;
-        }
-        else if(product <= -2)
-        {
-            Addition* n1 = new Addition("-1");
-            Addition* c = new Addition(1,-product);
-            
-            exp[index1]->ln.push_back(n1);
-            n1->mother = exp[index1];
-            n1->motherType = 2;
-            
-            exp[index1]->ln.push_back(c);
-            c->mother = exp[index1];
-            c->motherType = 2;
-        }
-        
-        cout<<"basicMultiplication"<<endl;
-        getTopmost()->print();
-        index1++;
+        else index++;
     }
+    
+    //create result
+    sum_complex = sum_complex % 4;
+    if(sum_complex == 2)
+    {
+        sum_complex = 0;
+        product *= -1;
+    }
+    else if(sum_complex == 3)
+    {
+        sum_complex = 1;
+        product *= -1;
+    }
+    
+    if(sum_complex == 1)
+    {
+        Addition* complex_i = new Addition("i");
+        
+        ln.push_back(complex_i);
+        complex_i->mother = this;
+        complex_i->motherType = 2;
+    }
+    
+    if(product == 1)
+    {
+        if(isEmpty()) nZero = true;
+    }
+    else if(product >= 2)
+    {
+        Addition* c = new Addition(1,product);
+        
+        ln.push_back(c);
+        c->mother = this;
+        c->motherType = 2;
+    }
+    else if(product == -1)
+    {
+        Addition* n1 = new Addition("-1");
+        
+        ln.push_back(n1);
+        n1->mother = this;
+        n1->motherType = 2;
+    }
+    else if(product <= -2)
+    {
+        Addition* n1 = new Addition("-1");
+        Addition* c = new Addition(1,-product);
+        
+        ln.push_back(n1);
+        n1->mother = this;
+        n1->motherType = 2;
+        
+        ln.push_back(c);
+        c->mother = this;
+        c->motherType = 2;
+    }
+    
+    cout<<"basicMultiplication"<<endl;
+    getTopmost()->print();
+}
+
+void Addition::exp0()
+{
+    explnCancellation();
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->exp0();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->exp0();
+    }
+    
+    bool isChanged = false;
+    int index = 0;
+    while(true)
+    {
+        if(index >= exp.size()) break;
+        
+        if(exp[index]->haveOnlyZero())
+        {
+            delete exp[index];
+            exp.erase(exp.begin()+index);
+            
+            Addition* one = new Addition(1,1);
+            
+            add.push_back(one);
+            one->mother = this;
+            one->motherType = 3;
+            
+            isChanged = true;
+        }
+        else index++;
+    }
+    
+    if(isChanged)
+    {
+        cout<<"exp0: exp(0) = 1"<<endl;
+        getTopmost()->print();
+    }
+    
+    cleanAdd();
 }
 
 void Addition::addCommonTerm()

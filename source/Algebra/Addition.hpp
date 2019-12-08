@@ -57,6 +57,7 @@ public:
     bool isEmpty();
     Addition* getTopmost();
     void fillDepthOrder();
+    bool haveOnlyZero();
     bool haveOnlyNegativeOne();
     bool haveOnlyPositveInterger();
     bool haveOnlyComplex();
@@ -66,6 +67,7 @@ public:
     void explnCancellation();
     
     void basicMultiplication();
+    void exp0();
     void addCommonTerm();
     void simplification();
 };
