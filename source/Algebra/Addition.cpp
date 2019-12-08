@@ -1232,23 +1232,23 @@ void Addition::basicArithmetic()
     }
 }
 
-void Addition::cleanAdd()
+void Addition::cleanAddOld()
 {
     basicArithmetic();
     
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
-        exp[i]->cleanAdd();
+        exp[i]->cleanAddOld();
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
-        ln[i]->cleanAdd();
+        ln[i]->cleanAddOld();
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        add[i]->cleanAdd();
+        add[i]->cleanAddOld();
     }
     
     //-inf
@@ -1614,20 +1614,124 @@ void Addition::cleanAdd()
     }
 }
 
+void Addition::cleanAdd()
+{
+    bool isChanged = false;
+    
+    //exp
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->exp.size() ; j++)
+        {
+            exp.push_back(add[i]->exp[j]);
+            add[i]->exp[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->exp.clear();
+    }
+    
+    if(isChanged)
+    {
+        eraseEmptyElement(add);
+        fillDepthOrder();
+        
+        sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
+            return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+        });
+        
+        cout<<"cleanAdd: exp"<<endl;
+        getTopmost()->print();
+    }
+    isChanged = false;
+    
+    //ln
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_n1.size() ; j++)
+        {
+            ln_n1.push_back(add[i]->ln_n1[j]);
+            add[i]->ln_n1[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_n1.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_c.size() ; j++)
+        {
+            ln_c.push_back(add[i]->ln_c[j]);
+            add[i]->ln_c[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_c.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_i.size() ; j++)
+        {
+            ln_i.push_back(add[i]->ln_i[j]);
+            add[i]->ln_i[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_i.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln.size() ; j++)
+        {
+            ln.push_back(add[i]->ln[j]);
+            add[i]->ln[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln.clear();
+    }
+    
+    if(isChanged)
+    {
+        eraseEmptyElement(add);
+        fillDepthOrder();
+        
+        sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
+        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+        });
+        
+        cout<<"cleanAdd: ln"<<endl;
+        getTopmost()->print();
+    }
+    isChanged = false;
+    
+    //add
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->add.size() ; j++)
+        {
+            add.push_back(add[i]->add[j]);
+            add[i]->add[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->add.clear();
+    }
+    
+    if(isChanged)
+    {
+        eraseEmptyElement(add);
+        fillDepthOrder();
+        
+        sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
+        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
+        });
+        
+        cout<<"cleanAdd: add"<<endl;
+        getTopmost()->print();
+    }
+    isChanged = false;
+}
+
 void Addition::explnCancellation()
 {
-    cleanAdd();
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->explnCancellation();
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        ln[i]->explnCancellation();
-    }
-    
     //\exp(\ln(x_1)) + \exp(\ln(x_2)) + y = x_1 + x_2 + y
     bool isChanged = false;
     int index = 0;
@@ -1652,14 +1756,23 @@ void Addition::explnCancellation()
         if(exp[index]->exp.size() != 0) {index++; continue;}
         if(exp[index]->add.size() != 0) {index++; continue;}
         
-        if(exp[index]->ln.size() != 1) {index++; continue;}
+        if(exp[index]->ln_n1.size() +
+           exp[index]->ln_c.size()  +
+           exp[index]->ln_i.size()  +
+           exp[index]->ln.size() != 1) {index++; continue;}
         
         //move x to add
-        add.push_back(exp[index]->ln[0]);
-        exp[index]->ln[0]->mother = this;
-        exp[index]->ln[0]->motherType = 3;
+        vector<Addition*>* ln_x = nullptr;
+        if     (exp[index]->ln_n1.size() == 1) ln_x = &(exp[index]->ln_n1);
+        else if(exp[index]->ln_c.size() == 1)  ln_x = &(exp[index]->ln_c);
+        else if(exp[index]->ln_i.size() == 1)  ln_x = &(exp[index]->ln_i);
+        else if(exp[index]->ln.size() == 1)    ln_x = &(exp[index]->ln);
         
-        exp[index]->ln.clear();
+        add.push_back((*ln_x)[0]);
+        (*ln_x)[0]->mother = this;
+        (*ln_x)[0]->motherType = 3;
+        
+        (*ln_x).clear();
         delete exp[index];
         exp.erase(exp.begin()+index);
         
@@ -1671,7 +1784,6 @@ void Addition::explnCancellation()
         //not empty because add.push_back
         cout<<"explnCancellation: \\exp(\\ln(x)) = x"<<endl;
         getTopmost()->print();
-        cleanAdd();
     }
     isChanged = false;
     
@@ -1698,6 +1810,9 @@ void Addition::explnCancellation()
         }
         if(nVariable) {index++; continue;}
         
+        if(ln[index]->ln_n1.size() != 0) {index++; continue;}
+        if(ln[index]->ln_c.size() != 0) {index++; continue;}
+        if(ln[index]->ln_i.size() != 0) {index++; continue;}
         if(ln[index]->ln.size() != 0) {index++; continue;}
         if(ln[index]->add.size() != 0) {index++; continue;}
         
@@ -1720,7 +1835,6 @@ void Addition::explnCancellation()
         //not empty because add.push_back
         cout<<"explnCancellation: \\ln(\\exp(x)) = x"<<endl;
         getTopmost()->print();
-        cleanAdd();
     }
     isChanged = false;
 }
@@ -1905,12 +2019,12 @@ void Addition::exp0()
         getTopmost()->print();
     }
     
-    cleanAdd();
+    cleanAddOld();
 }
 
 void Addition::addCommonTerm()
 {
-    cleanAdd();
+    cleanAddOld();
     
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
@@ -1961,30 +2075,46 @@ void Addition::addCommonTerm()
 
 void Addition::simplification()
 {
-    //exp(ln(x)) + y = (x) + y
-    //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->simplification();
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        ln[i]->simplification();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        add[i]->simplification();
+    }
     
     //----------------------
     //For example:
-    //exp(ln( exp(x) )) + y = (exp(x)) + y
-    //                      = exp(x) + y
+    //\exp(\ln( (x) + (\exp(x)) )) = \exp(\ln( (x) + \exp(x) ))  (cleanAdd)
+    //                             = ((x) + \exp(x))             (explnCancellation)
+    //                             = (x) + \exp(x)               (cleanAdd)
     
     //----------------------
     //(exp(x_1)+exp(x_2)+...) + (exp(y_1)+exp(y_2)+...) + ... = exp(x_1)+exp(x_2)+... + exp(y_1)+exp(y_2)+... + ...
     //( ln(x_1)+ ln(x_2)+...) + ( ln(y_1)+ ln(y_2)+...) + ... =  ln(x_1)+ ln(x_2)+... +  ln(y_1)+ ln(y_2)+... + ...
+    cleanAdd();
     
+    //exp(ln(x)) + y = (x) + y
+    //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
+    explnCancellation();
+    cleanAdd();
+    //better search for EXP[]
     //----------------------
-    //For example:
-    //EXP[ exp(ln( exp(ln(tau) + ln(i)) )) + x ] = EXP[ exp(ln(tau) + ln(i)) + x ]
-    //                                           = EXP[ ln(i) + x ]
-    
-    //----------------------
-    //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
     
     //----------------------
     //For example:
     //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
     //                  = EXP[ -inf ]
+    
+    //----------------------
+    //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
     
     //----------------------
     //-inf + x = -inf
@@ -1994,19 +2124,19 @@ void Addition::simplification()
     //exp(0) = 1
     
     //----------------------
-    //Euler formula:
-    //EXP[ exp(                 ln(tau) + ln(i)) + x ] =X= EXP[                + x ]
-    //EXP[ exp(ln(-1)         + ln(tau) + ln(i)) + x ] =X= EXP[          ln(i) + x ]
-    //EXP[ exp(         ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1)         + x ]
-    //EXP[ exp(ln(-1) + ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1) + ln(i) + x ]
-    
-    //----------------------
     //For example:
     //EXP[ exp(ln(tau) + ln(i)) + ln(i) + ln(-1) + x ] = EXP[ ln(i)  + ln(i) + ln(-1) + x]
     //                                                 = EXP[ ln(-1) + ln(-1) + x ]
     //                                                 = EXP[ ln(1)  + x ]
     //                                                 = EXP[ 0 + x ]
     //                                                 = EXP[ x ]
+    
+    //----------------------
+    //Euler formula:
+    //EXP[ exp(                 ln(tau) + ln(i)) + x ] =X= EXP[                + x ]
+    //EXP[ exp(ln(-1)         + ln(tau) + ln(i)) + x ] =X= EXP[          ln(i) + x ]
+    //EXP[ exp(         ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1)         + x ]
+    //EXP[ exp(ln(-1) + ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1) + ln(i) + x ]
     
     //----------------------
     //EXP[ ln(i) + ln(i) + x ] = //EXP[ ln(-1) + x ]

@@ -50,16 +50,16 @@ int main()
     delete test1;
     */
     
-    /*
-    //test explnCancellation
-    //Addition* test = new Addition("\\exp(\\ln(x+1)) + \\exp(\\ln(x+1)) + y");
-    Addition* test = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
-    test->print();
-    test->explnCancellation();
-    delete test;
-    */
-    
     //*
+    //test explnCancellation
+    Addition* test1 = new Addition("\\exp(\\ln( (x) + \\exp(x) ))");
+    //Addition* test1 = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
+    test1->print();
+    test1->simplification();
+    delete test1;
+    //*/
+    
+    /*
     //test basicMultiplication
     //Addition* test = new Addition("\\exp( \\ln(-1) + \\ln(2) ) + \\exp( \\ln(-1) + \\ln(2) )");
     //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1))");
@@ -70,7 +70,7 @@ int main()
     //test->basicMultiplication();
     //test->exp0();
     delete test;
-    //*/
+    */
     
     /*
     //test addCommonTerm

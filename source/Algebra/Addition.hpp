@@ -67,6 +67,7 @@ public:
     bool haveOnlyComplex();
     
     void basicArithmetic();
+    void cleanAddOld();
     void cleanAdd();
     void explnCancellation();
     
