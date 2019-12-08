@@ -1819,7 +1819,10 @@ void Addition::addCommonTerm()
     fillDepthOrder();
     
     //c >= 2
-    //Type 1: x = ln(x)
+    //Type 0: x = positiveInteger, (-1)
+    //x_1 + x_2 + ... = \exp(\ln(-1) + \ln(c))
+    
+    //Type 1: x = tau, i, x, y, z, ln(x)
     //x + x = \exp(\ln(2) + \ln(x))
     
     //Type 2: x = positiveInteger, (-1), tau, i, x, y, z, ln(x)
@@ -1852,5 +1855,90 @@ void Addition::addCommonTerm()
 
 void Addition::simplification()
 {
-    explnCancellation();
+    //exp(ln(x)) + y = (x) + y
+    //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
+    
+    //----------------------
+    //For example:
+    //exp(ln( exp(x) )) + y = (exp(x)) + y
+    //                      = exp(x) + y
+    
+    //----------------------
+    //(exp(x_1)+exp(x_2)+...) + (exp(y_1)+exp(y_2)+...) + ... = exp(x_1)+exp(x_2)+... + exp(y_1)+exp(y_2)+... + ...
+    //( ln(x_1)+ ln(x_2)+...) + ( ln(y_1)+ ln(y_2)+...) + ... =  ln(x_1)+ ln(x_2)+... +  ln(y_1)+ ln(y_2)+... + ...
+    
+    //----------------------
+    //For example:
+    //EXP[ exp(ln( exp(ln(tau) + ln(i)) )) + x ] = EXP[ exp(ln(tau) + ln(i)) + x ]
+    //                                           = EXP[ ln(i) + x ]
+    
+    //----------------------
+    //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
+    
+    //----------------------
+    //For example:
+    //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
+    //                  = EXP[ -inf ]
+    
+    //----------------------
+    //-inf + x = -inf
+    
+    //----------------------
+    //exp(-inf) = 0
+    //exp(0) = 1
+    
+    //----------------------
+    //Euler formula:
+    //EXP[ exp(                 ln(tau) + ln(i)) + x ] =X= EXP[                + x ]
+    //EXP[ exp(ln(-1)         + ln(tau) + ln(i)) + x ] =X= EXP[          ln(i) + x ]
+    //EXP[ exp(         ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1)         + x ]
+    //EXP[ exp(ln(-1) + ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1) + ln(i) + x ]
+    
+    //----------------------
+    //For example:
+    //EXP[ exp(ln(tau) + ln(i)) + ln(i) + ln(-1) + x ] = EXP[ ln(i)  + ln(i) + ln(-1) + x]
+    //                                                 = EXP[ ln(-1) + ln(-1) + x ]
+    //                                                 = EXP[ ln(1)  + x ]
+    //                                                 = EXP[ 0 + x ]
+    //                                                 = EXP[ x ]
+    
+    //----------------------
+    //EXP[ ln(i) + ln(i) + x ] = //EXP[ ln(-1) + x ]
+    //EXP[ ln(-1) + ln(-1) + x ] = //EXP[ ln(1) + x ]
+    //EXP[ ln(c_1) + ln(c_2) + x ] = //EXP[ ln(c_1*c_2) + x ]
+    
+    //----------------------
+    //EXP[ ln(1) + x ] = EXP[ 0 + x ]
+    
+    //----------------------
+    //x + (0) = x
+    
+    //----------------------
+    //c >= 2
+    //Type 0: x = positiveInteger, (-1)
+    //x_1 + x_2 + ... = \exp(\ln(-1) + \ln(c))
+    
+    //Type 1: x = tau, i, x, y, z, ln(x)
+    //x + x = \exp(\ln(2) + \ln(x))
+    
+    //Type 2: x = positiveInteger, (-1), tau, i, x, y, z, ln(x)
+    //x + \exp(\ln(-1)          + \ln(x)) = 0
+    //x + \exp(          \ln(c) + \ln(x)) = \exp(          \ln(c+1) + \ln(x))
+    //x + \exp(\ln(-1) + \ln(c) + \ln(x)) = \exp(\ln(-1) + \ln(c-1) + \ln(x))
+    
+    //Type 3: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
+    //\exp(                     x) + \exp(                   + x) = \exp(          \ln(2)       + x)
+    //\exp(                     x) + \exp(\ln(-1)            + x) = 0
+    //\exp(                     x) + \exp(          \ln(c)   + x) = \exp(          \ln(c+1)     + x)
+    //\exp(                     x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c-1)     + x)
+    
+    //\exp(\ln(-1)            + x) + \exp(\ln(-1)            + x) = \exp(\ln(-1) + \ln(2)       + x)
+    //\exp(\ln(-1)            + x) + \exp(          \ln(c)   + x) = \exp(          \ln(c-1)     + x)
+    //\exp(\ln(-1)            + x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c+1)     + x)
+    
+    //\exp(          \ln(c_1) + x) + \exp(          \ln(c_2) + x) = \exp(          \ln(c_1+c_2) + x)
+    //\exp(          \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(          \ln(c_1-c_2) + x)
+    //                                                              \exp(\ln(-1) + \ln(c_2-c_1) + x)
+    
+    //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
 }
