@@ -2368,18 +2368,27 @@ void Addition::simplification()
     //x + (0) = x
     
     //----------------------
-    //For example:
-    //\exp(\ln( (x) + \exp(x) )) = ((x) + \exp(x))             (explnCancellation)
-    //                           = (x) + \exp(x)               (cleanAdd)
+    //For example1:
+    //  exp(ln( exp(x) + (x) ))
+    //= ( exp(x) + (x) )           (explnCancellation)
+    //= exp(x) + (x)               (cleanAdd)
     
-    //exp(ln(x)) + y = (x) + y
-    //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
-    explnCancellation();
+    //----------------------
+    //For example2:
+    //  EXP[ (ln(exp(x))) + (x) ]
+    //= EXP[ ln(exp(x)) + (x) ]      (cleanAdd)
+    //= EXP[ (x) + (x) ]             (explnCancellation)
     
     //----------------------
     //(exp(x_1)+exp(x_2)+...) + (exp(y_1)+exp(y_2)+...) + ... = exp(x_1)+exp(x_2)+... + exp(y_1)+exp(y_2)+... + ...
     //( ln(x_1)+ ln(x_2)+...) + ( ln(y_1)+ ln(y_2)+...) + ... =  ln(x_1)+ ln(x_2)+... +  ln(y_1)+ ln(y_2)+... + ...
     //(0) + (2) + ((-1)) + (tau) + (i) + ((-inf)) + (x) + (y) + (z) = 0 + 2 + (-1) + tau + i + (-inf) + x + y + z
+    cleanAdd();
+    
+    //----------------------
+    //exp(ln(x)) + y = (x) + y
+    //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
+    explnCancellation();
     cleanAdd();
     //better search for EXP[]
     //----------------------

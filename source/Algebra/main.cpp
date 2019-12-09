@@ -40,14 +40,14 @@ int main()
     delete test1;
     */
     
-    /*
+    //*
     //test explnCancellation
-    Addition* test1 = new Addition("\\exp(\\ln( (x) + \\exp(x) ))");
-    //Addition* test1 = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
+    //Addition* test1 = new Addition("\\exp(\\ln( \\exp(x) + x ))");
+    Addition* test1 = new Addition("\\exp( \\ln(\\exp(x)) + x )");
     test1->print();
     test1->simplification();
     delete test1;
-    */
+    //*/
     
     /*
     //test constant calculation
@@ -71,16 +71,16 @@ int main()
     delete test;
     */
     
-    //*
+    /*
     //test expand
-    Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) ) + \\exp(\\ln(\\tau + x) + \\ln(\\tau + x) )");
-    //Addition* test = new Addition("\\exp(\\ln((-1) + i) + \\ln((-1) + i) ) + \\exp(\\ln((-1) + i) + \\ln((-1) + i) )");
+    //Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) ) + \\exp(\\ln(\\tau + x) + \\ln(\\tau + x) )");
+    Addition* test = new Addition("\\exp( \\ln(\\exp(x) + \\ln(y)) + \\ln(\\exp(x) + \\ln(y)) )");
     
     test->print();
     test->simplification();
     test->simplification();
     delete test;
-    //*/
+    */
     
     /*
     //test addCommonTerm

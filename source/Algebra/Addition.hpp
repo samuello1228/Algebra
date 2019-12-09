@@ -71,8 +71,8 @@ public:
     void basicArithmetic();
     void cleanAddOld();
     
-    void explnCancellation();
     void cleanAdd();
+    void explnCancellation();
     
     bool lnInf();
     void ln0();
