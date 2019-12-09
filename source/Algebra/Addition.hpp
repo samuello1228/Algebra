@@ -77,8 +77,8 @@ public:
     void addInf();
     void expInf();
     void exp0();
+    void ln_1nic();
     
-    void basicMultiplication();
     void addCommonTerm();
     void simplification();
 };

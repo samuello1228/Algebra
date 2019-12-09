@@ -1871,7 +1871,6 @@ void Addition::explnCancellation()
     //no need to do explnCancellation for this->add
     //because the cleanAdd is done for this->add[i]
     //this->add[i]->exp.size must be 0, this->add[i]->ln.size must be 0
-    
 }
 
 void Addition::ln0()
@@ -2012,142 +2011,128 @@ void Addition::exp0()
     }
 }
 
-void Addition::basicMultiplication()
+void Addition::ln_1nic()
 {
-    explnCancellation();
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->basicMultiplication();
-    }
-    
     if(mother == nullptr) return;
     else if(motherType != 1) return;
+    
+    bool isChanged = false;
+    int product = 1;
+    
+    //For ln_i
+    if(ln_i.size() >= 2)
+    {
+        unsigned long n;
+        if(ln_i.size() % 2 == 0)
+        {
+            n = ln_i.size();
+        }
+        else
+        {
+            n = ln_i.size() -1;
+        }
+        
+        for(unsigned int i = 0; i < n ; i++)
+        {
+            delete ln_i[0];
+            ln_i.erase(ln_i.begin());
+        }
+        
+        if(n/2 % 2 == 1) product *= -1;
+        
+        isChanged = true;
+    }
+    
+    //For ln_n1
+    if(ln_n1.size() >= 2)
+    {
+        unsigned long n;
+        if(ln_n1.size() % 2 == 0)
+        {
+            n = ln_n1.size();
+        }
+        else
+        {
+            n = ln_n1.size() -1;
+        }
+        
+        for(unsigned int i = 0; i < n ; i++)
+        {
+            delete ln_n1[0];
+            ln_n1.erase(ln_n1.begin());
+        }
+        
+        isChanged = true;
+    }
+    
+    if(product == -1)
+    {
+        if(ln_n1.size() == 1)
+        {
+            delete ln_n1[0];
+            ln_n1.erase(ln_n1.begin());
+        }
+        else if(ln_n1.size() == 0)
+        {
+            Addition* n1 = new Addition("-1");
+            
+            ln_n1.push_back(n1);
+            n1->mother = this;
+            n1->motherType = 2;
+        }
+        
+        product = 1;
+    }
     
     //check whether the expression need to be simplified
     {
         int count_one = 0;
-        int count_n1 = 0;
-        int count_i = 0;
         int count_c = 0;
-        for(unsigned int j = 0; j < ln.size() ; j++)
+        for(unsigned int j = 0; j < ln_c.size() ; j++)
         {
-            if(ln[j]->haveOnlyNegativeOne())
+            if(ln_c[j]->positveInterger == 1)
             {
-                count_n1++;
+                count_one++;
             }
-            else if(ln[j]->haveOnlyPositveInterger())
+            else
             {
-                if(ln[j]->positveInterger == 1)
-                {
-                    count_one++;
-                }
-                else
-                {
-                    count_c++;
-                }
-            }
-            else if(ln[j]->haveOnlyComplex())
-            {
-                count_i++;
+                count_c++;
             }
         }
         
-        if(count_one == 0 && count_n1 <= 1 && count_i <= 1 && count_c <= 1)
-        {
-            return;
-        }
+        if(count_one >= 1 && count_c >= 2) isChanged = true;
     }
     
-    int product = 1;
-    int sum_complex = 0;
-    int index = 0;
-    while(true)
+    //For ln_c
+    if(isChanged)
     {
-        if(index >= ln.size()) break;
+        int index = 0;
+        while(true)
+        {
+            if(index >= ln_c.size()) break;
+            
+            product *= ln_c[index]->positveInterger;
+            
+            delete ln_c[index];
+            ln_c.erase(ln_c.begin()+index);
+        }
         
-        if(ln[index]->haveOnlyNegativeOne())
+        if(product >= 2)
         {
-            product *= -1;
+            Addition* c = new Addition(1,product);
             
-            delete ln[index];
-            ln.erase(ln.begin()+index);
+            ln_c.push_back(c);
+            c->mother = this;
+            c->motherType = 2;
         }
-        else if(ln[index]->haveOnlyPositveInterger())
-        {
-            product *= ln[index]->positveInterger;
-            
-            delete ln[index];
-            ln.erase(ln.begin()+index);
-        }
-        else if(ln[index]->haveOnlyComplex())
-        {
-            sum_complex++;
-            
-            delete ln[index];
-            ln.erase(ln.begin()+index);
-        }
-        else index++;
     }
     
-    //create result
-    sum_complex = sum_complex % 4;
-    if(sum_complex == 2)
-    {
-        sum_complex = 0;
-        product *= -1;
-    }
-    else if(sum_complex == 3)
-    {
-        sum_complex = 1;
-        product *= -1;
-    }
-    
-    if(sum_complex == 1)
-    {
-        Addition* complex_i = new Addition("i");
-        
-        ln.push_back(complex_i);
-        complex_i->mother = this;
-        complex_i->motherType = 2;
-    }
-    
-    if(product == 1)
+    if(isChanged)
     {
         if(isEmpty()) nZero = true;
+        cout<<"log formula"<<endl;
+        getTopmost()->print();
     }
-    else if(product >= 2)
-    {
-        Addition* c = new Addition(1,product);
-        
-        ln.push_back(c);
-        c->mother = this;
-        c->motherType = 2;
-    }
-    else if(product == -1)
-    {
-        Addition* n1 = new Addition("-1");
-        
-        ln.push_back(n1);
-        n1->mother = this;
-        n1->motherType = 2;
-    }
-    else if(product <= -2)
-    {
-        Addition* n1 = new Addition("-1");
-        Addition* c = new Addition(1,-product);
-        
-        ln.push_back(n1);
-        n1->mother = this;
-        n1->motherType = 2;
-        
-        ln.push_back(c);
-        c->mother = this;
-        c->motherType = 2;
-    }
-    
-    cout<<"basicMultiplication"<<endl;
-    getTopmost()->print();
 }
 
 void Addition::addCommonTerm()
@@ -2218,6 +2203,9 @@ void Addition::simplification()
         add[i]->simplification();
     }
     
+    //implicit done in the following functions
+    //x + (0) = x
+    
     //----------------------
     //For example:
     //\exp(\ln( (x) + \exp(x) )) = ((x) + \exp(x))             (explnCancellation)
@@ -2256,29 +2244,23 @@ void Addition::simplification()
     
     //----------------------
     //For example:
-    //EXP[ exp(ln(tau) + ln(i)) + ln(i) + ln(-1) + x ] = EXP[ ln(i)  + ln(i) + ln(-1) + x]
-    //                                                 = EXP[ ln(-1) + ln(-1) + x ]
-    //                                                 = EXP[ ln(1)  + x ]
-    //                                                 = EXP[ 0 + x ]
-    //                                                 = EXP[ x ]
+    //  EXP[ ln(-1) + ln(-1) + x ]
+    //= EXP[ ln(1) + x ]            (log formula)
+    //= EXP[ x ]                    (ln(1) = 0)
     
     //----------------------
-    //Euler formula:
-    //EXP[ exp(                 ln(tau) + ln(i)) + x ] =X= EXP[                + x ]
-    //EXP[ exp(ln(-1)         + ln(tau) + ln(i)) + x ] =X= EXP[          ln(i) + x ]
-    //EXP[ exp(         ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1)         + x ]
-    //EXP[ exp(ln(-1) + ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1) + ln(i) + x ]
-    
-    //----------------------
+    //log formula:
     //EXP[ ln(i) + ln(i) + x ] = //EXP[ ln(-1) + x ]
     //EXP[ ln(-1) + ln(-1) + x ] = //EXP[ ln(1) + x ]
+    //EXP[ ln(1) + x ] = EXP[ x ]
     //EXP[ ln(c_1) + ln(c_2) + x ] = //EXP[ ln(c_1*c_2) + x ]
+    ln_1nic();
     
     //----------------------
-    //EXP[ ln(1) + x ] = EXP[ 0 + x ]
-    
-    //----------------------
-    //x + (0) = x
+    //For example:
+    //  EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp( ln(-1) + ln(tau) + ln(i)) + x ]
+    //= EXP[ exp(ln(tau) + ln(i)) + x ]                                                    (addCommonTerm)
+    //= EXP[ ln(i) + x ]                                                                   (Euler formula)
     
     //----------------------
     //c >= 2
@@ -2308,4 +2290,12 @@ void Addition::simplification()
     //                                                              \exp(\ln(-1) + \ln(c_2-c_1) + x)
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
+    
+    //----------------------
+    //Euler formula:
+    //EXP[ exp(                 ln(tau) + ln(i)) + x ] =X= EXP[                + x ]
+    //EXP[ exp(ln(-1)         + ln(tau) + ln(i)) + x ] =X= EXP[          ln(i) + x ]
+    //EXP[ exp(         ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1)         + x ]
+    //EXP[ exp(ln(-1) + ln(c) + ln(tau) + ln(i)) + x ] =X= EXP[ ln(-1) + ln(i) + x ]
+    euler();
 }

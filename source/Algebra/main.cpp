@@ -50,14 +50,14 @@ int main()
     delete test1;
     */
     
-    //*
+    /*
     //test explnCancellation
     Addition* test1 = new Addition("\\exp(\\ln( (x) + \\exp(x) ))");
     //Addition* test1 = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
     test1->print();
     test1->simplification();
     delete test1;
-    //*/
+    */
     
     /*
     //test constant calculation
@@ -68,18 +68,17 @@ int main()
     delete test1;
     */
     
-    /*
-    //test basicMultiplication
+    //*
+    //test ln_1nic
     //Addition* test = new Addition("\\exp( \\ln(-1) + \\ln(2) ) + \\exp( \\ln(-1) + \\ln(2) )");
     //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1))");
     //Addition* test = new Addition("\\exp( \\ln(2) + \\ln(i) + \\ln(i) + \\ln(i)) + \\exp( \\ln(-1) + \\ln(-1) + \\ln(2) + \\ln(2) )");
     Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1)) + \\exp( \\ln(i) + \\ln(i) + \\ln(i) + \\ln(i) ) + \\ln(x)");
     
     test->print();
-    //test->basicMultiplication();
-    //test->exp0();
+    test->simplification();
     delete test;
-    */
+    //*/
     
     /*
     //test addCommonTerm
