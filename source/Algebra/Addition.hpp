@@ -73,6 +73,7 @@ public:
     void explnCancellation();
     void cleanAdd();
     
+    bool lnInf();
     void ln0();
     void addInf();
     void expInf();

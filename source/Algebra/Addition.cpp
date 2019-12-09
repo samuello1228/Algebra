@@ -1873,6 +1873,16 @@ void Addition::explnCancellation()
     //this->add[i]->exp.size must be 0, this->add[i]->ln.size must be 0
 }
 
+bool Addition::lnInf()
+{
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        if(ln[i]->haveOnlyInf()) return true;
+    }
+    
+    return false;
+}
+
 void Addition::ln0()
 {
     //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
@@ -2222,6 +2232,14 @@ void Addition::simplification()
     cleanAdd();
     //better search for EXP[]
     //----------------------
+    
+    //----------------------
+    //check whether ln(-inf) exist
+    if(lnInf())
+    {
+        cout<<"Error: In(-inf) exist"<<endl;
+        return;
+    }
     
     //----------------------
     //For example:

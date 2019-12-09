@@ -24,16 +24,6 @@ int main()
     Addition* z = new Addition("z");
     
     /*
-    //test basicArithmetic
-    Addition* test = new Addition("0");
-    test->nNegative = true;
-    test->positveInterger = 1;
-    test->print();
-    test->basicArithmetic();
-    delete test;
-    */
-    
-    /*
     //test cleanAdd
     Addition* test1 = new Addition("1"); Addition* test2 = new Addition("((-1) + (-1)) + ((-1) + (0))");
     //Addition* test1 = new Addition("\\tau"); Addition* test2 = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
@@ -59,16 +49,17 @@ int main()
     delete test1;
     */
     
-    /*
+    //*
     //test constant calculation
-    Addition* test1 = new Addition("\\exp(\\ln(0) + x)");
+    Addition* test1 = new Addition("\\ln((-\\infty)+x)");
+    //Addition* test1 = new Addition("\\exp(\\ln(0) + x)");
     //Addition* test1 = new Addition("\\exp(0)");
     test1->print();
     test1->simplification();
     delete test1;
-    */
+    //*/
     
-    //*
+    /*
     //test ln_1nic
     //Addition* test = new Addition("\\exp( \\ln(-1) + \\ln(2) ) + \\exp( \\ln(-1) + \\ln(2) )");
     //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1))");
@@ -78,7 +69,7 @@ int main()
     test->print();
     test->simplification();
     delete test;
-    //*/
+    */
     
     /*
     //test addCommonTerm
