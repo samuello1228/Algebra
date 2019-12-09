@@ -59,6 +59,7 @@ public:
     Addition* getCopy();
     Addition* getTopmost();
     void fillDepthOrder();
+    void classifyln();
     
     bool isEmpty();
     bool haveOnlyZero();

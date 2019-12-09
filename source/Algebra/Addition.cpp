@@ -1050,6 +1050,32 @@ void Addition::fillDepthOrder()
     }
 }
 
+void Addition::classifyln()
+{
+    int index = 0;
+    while(true)
+    {
+        if(index >= ln.size()) break;
+        
+        if(ln[index]->haveOnlyNegativeOne())
+        {
+            ln_n1.push_back(ln[index]);
+            ln.erase(ln.begin()+index);
+        }
+        else if(ln[index]->haveOnlyPositveInterger())
+        {
+            ln_c.push_back(ln[index]);
+            ln.erase(ln.begin()+index);
+        }
+        else if(ln[index]->haveOnlyComplex())
+        {
+            ln_i.push_back(ln[index]);
+            ln.erase(ln.begin()+index);
+        }
+        else index++;
+    }
+}
+
 bool Addition::isEmpty()
 {
     if(nZero) return false;
@@ -2464,12 +2490,9 @@ void Addition::simplification()
     //EXP[ ln(-1) + ln(-1) + x ] = //EXP[ ln(1) + x ]
     //EXP[ ln(1) + x ] = EXP[ x ]
     //EXP[ ln(c_1) + ln(c_2) + x ] = //EXP[ ln(c_1*c_2) + x ]
+    //need classifyln
+    classifyln();
     ln_1nic();
-    
-    //----------------------
-    //Expand:
-    //exp(x + ln(y + z)) = exp(x + ln(y)) + exp(x + ln(z))
-    expand();
     
     //----------------------
     //For example:
@@ -2477,6 +2500,12 @@ void Addition::simplification()
     //= EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp(ln(-1) + ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ] (Expand)
     //= EXP[ exp(ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ]                                         (addCommonTerm)
     //= EXP[ ln(i) + exp( ln(-1) + ln(x) + ln(i)) + y ]                                                       (Euler formula)
+    
+    //----------------------
+    //Expand:
+    //exp(x + ln(y + z)) = exp(x + ln(y)) + exp(x + ln(z))
+    //need ln_1nic before expand, to ensure ln_n1.size() <= 1, etc
+    expand();
     
     //----------------------
     //c >= 2
@@ -2506,6 +2535,8 @@ void Addition::simplification()
     //                                                              \exp(\ln(-1) + \ln(c_2-c_1) + x)
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
+    //need classifyln
+    classifyln();
     
     //----------------------
     //Euler formula:
