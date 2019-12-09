@@ -49,7 +49,7 @@ public:
     Addition();
     Addition(string latex);
     Addition(int fundamentalType, unsigned int x); //fundamentalType: 1 = positveInterger, 2 = the nth variable
-    Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln
+    Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln, 3 = add
     Addition(Addition* operand1, Addition* operand2); // addition
     ~Addition();
     
@@ -66,6 +66,7 @@ public:
     bool haveOnlyPositveInterger();
     bool haveOnlyComplex();
     bool haveOnlyInf();
+    bool haveOnlyOneItem();
     
     void basicArithmetic();
     void cleanAddOld();
@@ -79,6 +80,8 @@ public:
     void expInf();
     void exp0();
     void ln_1nic();
+    
+    void expand();
     
     void addCommonTerm();
     void simplification();

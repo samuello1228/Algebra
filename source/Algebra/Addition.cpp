@@ -624,6 +624,7 @@ Addition::Addition(int compositeType, Addition* operand)
     {
         if(compositeType == 1) order = operand->order +1;
         else if(compositeType == 2) order = operand->order -1;
+        else if(compositeType == 3) order = operand->order;
     }
     else order = 0;
     
@@ -642,6 +643,7 @@ Addition::Addition(int compositeType, Addition* operand)
         else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
         else ln.push_back(operand);
     }
+    else if(compositeType == 3) add.push_back(operand);
 }
 
 Addition::Addition(Addition* operand1, Addition* operand2)
@@ -1154,6 +1156,30 @@ bool Addition::haveOnlyInf()
     if(add.size() != 0) return false;
     
     return true;
+}
+
+bool Addition::haveOnlyOneItem()
+{
+    int sum = 0;
+    if(nNegative) sum++;
+    if(positveInterger != 0) sum++;
+    if(nTau) sum++;
+    if(nComplex) sum++;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) sum++;
+    }
+    
+    sum += exp.size();
+    sum += ln_n1.size();
+    sum += ln_c.size();
+    sum += ln_i.size();
+    sum += ln.size();
+    sum += add.size();
+    
+    if(sum == 1) return true;
+    else return false;
 }
 
 void Addition::basicArithmetic()
@@ -2145,6 +2171,131 @@ void Addition::ln_1nic()
     }
 }
 
+void Addition::expand()
+{
+    //exp(x + ln(y_1 + y_2 + ...)) = exp(x + ln(y_1)) + exp(x + ln(y_2)) + ...
+    
+    unsigned int index1 = 0;
+    while(true)
+    {
+        if(index1 >= exp.size()) break;
+        
+        //check whether each ln contains only one item
+        bool isOnlyOne = true;
+        int lnIndex = 0;
+        for(unsigned int i = 0; i < exp[index1]->ln.size() ; i++)
+        {
+            if(!exp[index1]->ln[i]->haveOnlyOneItem())
+            {
+                isOnlyOne = false;
+                lnIndex = i ;
+                break;
+            }
+        }
+        
+        if(isOnlyOne) index1++;
+        else
+        {
+            Addition* oldExpItem = exp[index1];
+            Addition* oldExplnItem = exp[index1]->ln[lnIndex];
+            Addition* newExpItem = exp[index1]->getCopy();
+            delete newExpItem->ln[lnIndex];
+            
+            if(oldExplnItem->nNegative)
+            {
+                newExpItem->ln[lnIndex] = new Addition("-1");
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->nNegative = false;
+            }
+            else if(oldExplnItem->positveInterger != 0)
+            {
+                newExpItem->ln[lnIndex] = new Addition(1,oldExplnItem->positveInterger);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->positveInterger = 0;
+            }
+            else if(oldExplnItem->nTau)
+            {
+                newExpItem->ln[lnIndex] = new Addition("\\tau");
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->nTau = false;
+            }
+            else if(oldExplnItem->nComplex)
+            {
+                newExpItem->ln[lnIndex] = new Addition("i");
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->nComplex = false;
+            }
+            else if(oldExplnItem->variable.size() >= 1)
+            {
+                for(unsigned int i = 0; i < oldExplnItem->variable.size() ; i++)
+                {
+                    if(oldExplnItem->variable[i])
+                    {
+                        newExpItem->ln[lnIndex] = new Addition(2,i);
+                        exp.insert(exp.begin()+index1,newExpItem);
+                        
+                        oldExplnItem->variable[i] = false;
+                        
+                        break;
+                    }
+                }
+            }
+            else if(oldExplnItem->exp.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(1,oldExplnItem->exp[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->exp.erase(oldExplnItem->exp.begin());
+            }
+            else if(oldExplnItem->ln_n1.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_n1[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->ln_n1.erase(oldExplnItem->ln_n1.begin());
+            }
+            else if(oldExplnItem->ln_c.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_c[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->ln_c.erase(oldExplnItem->ln_c.begin());
+            }
+            else if(oldExplnItem->ln_i.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_i[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->ln_i.erase(oldExplnItem->ln_i.begin());
+            }
+            else if(oldExplnItem->ln.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->ln.erase(oldExplnItem->ln.begin());
+            }
+            else if(oldExplnItem->add.size() >= 1)
+            {
+                newExpItem->ln[lnIndex] = new Addition(3,oldExplnItem->add[0]);
+                exp.insert(exp.begin()+index1,newExpItem);
+                
+                oldExplnItem->add.erase(oldExplnItem->add.begin());
+            }
+            
+            cout<<"Expand:"<<endl;
+            getTopmost()->print();
+            
+            newExpItem->simplification();
+            oldExpItem->simplification();
+        }
+    }
+}
+
 void Addition::addCommonTerm()
 {
     cleanAddOld();
@@ -2275,10 +2426,16 @@ void Addition::simplification()
     ln_1nic();
     
     //----------------------
+    //Expand:
+    //exp(x + ln(y + z)) = exp(x + ln(y)) + exp(x + ln(z))
+    expand();
+    
+    //----------------------
     //For example:
-    //  EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp( ln(-1) + ln(tau) + ln(i)) + x ]
-    //= EXP[ exp(ln(tau) + ln(i)) + x ]                                                    (addCommonTerm)
-    //= EXP[ ln(i) + x ]                                                                   (Euler formula)
+    //  EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp(ln(-1) + ln(tau + x) + ln(i)) + y ]
+    //= EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp(ln(-1) + ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ] (Expand)
+    //= EXP[ exp(ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ]                                         (addCommonTerm)
+    //= EXP[ ln(i) + exp( ln(-1) + ln(x) + ln(i)) + y ]                                                       (Euler formula)
     
     //----------------------
     //c >= 2

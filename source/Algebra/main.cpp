@@ -49,7 +49,7 @@ int main()
     delete test1;
     */
     
-    //*
+    /*
     //test constant calculation
     Addition* test1 = new Addition("\\ln((-\\infty)+x)");
     //Addition* test1 = new Addition("\\exp(\\ln(0) + x)");
@@ -57,7 +57,7 @@ int main()
     test1->print();
     test1->simplification();
     delete test1;
-    //*/
+    */
     
     /*
     //test ln_1nic
@@ -70,6 +70,17 @@ int main()
     test->simplification();
     delete test;
     */
+    
+    //*
+    //test expand
+    Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) ) + \\exp(\\ln(\\tau + x) + \\ln(\\tau + x) )");
+    //Addition* test = new Addition("\\exp(\\ln((-1) + i) + \\ln((-1) + i) ) + \\exp(\\ln((-1) + i) + \\ln((-1) + i) )");
+    
+    test->print();
+    test->simplification();
+    test->simplification();
+    delete test;
+    //*/
     
     /*
     //test addCommonTerm
