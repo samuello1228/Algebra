@@ -2356,33 +2356,20 @@ void Addition::expand()
 
 void Addition::addCommonTerm()
 {
-    cleanAddOld();
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->addCommonTerm();
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        ln[i]->addCommonTerm();
-    }
-    
-    fillDepthOrder();
-    
+    //----------------------
     //c >= 2
-    //Type 0: x = positiveInteger, (-1)
+    //Type 1a: x = positiveInteger, (-1)
     //x_1 + x_2 + ... = \exp(\ln(-1) + \ln(c))
     
-    //Type 1: x = tau, i, x, y, z, ln(x)
+    //Type 1b: x = tau, i, x, y, z, ln(x)
     //x + x = \exp(\ln(2) + \ln(x))
     
-    //Type 2: x = positiveInteger, (-1), tau, i, x, y, z, ln(x)
+    //Type 1c: x = positiveInteger, (-1), tau, i, x, y, z, ln(x)
     //x + \exp(\ln(-1)          + \ln(x)) = 0
     //x + \exp(          \ln(c) + \ln(x)) = \exp(          \ln(c+1) + \ln(x))
     //x + \exp(\ln(-1) + \ln(c) + \ln(x)) = \exp(\ln(-1) + \ln(c-1) + \ln(x))
     
-    //Type 3: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
+    //Type 2: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
     //\exp(                     x) + \exp(                   + x) = \exp(          \ln(2)       + x)
     //\exp(                     x) + \exp(\ln(-1)            + x) = 0
     //\exp(                     x) + \exp(          \ln(c)   + x) = \exp(          \ln(c+1)     + x)
@@ -2398,11 +2385,142 @@ void Addition::addCommonTerm()
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
     
-    //For Type 1
+    bool isChanged = false;
+    //For Type 1a
+    {
+        int sum = 0; //the sum of all integer
+        int nItem = 0; //number of integer
+        int firstNegativeIndex = -1; //keep only one exp[i] for negative result, delete others
+        
+        //fill sum, nItem, firstNegativeIndex, remove other exp[i], remove all integer in add
+        if(nZero) nItem++;
+        if(nNegative)
+        {
+            nItem++;
+            sum += -1;
+        }
+        if(positveInterger != 0)
+        {
+            nItem++;
+            sum += positveInterger;
+        }
+        
+        //For exp
+        int index = 0;
+        while(true)
+        {
+            if(index >= exp.size()) break;
+            
+            if(!exp[index]->nZero &&
+               !exp[index]->nNegative &&
+               exp[index]->positveInterger == 0 &&
+               !exp[index]->nTau &&
+               !exp[index]->nComplex &&
+               exp[index]->variable.size() == 0 &&
+               exp[index]->exp.size() == 0 &&
+               exp[index]->ln_n1.size() == 1 &&
+               exp[index]->ln_c.size() == 1 &&
+               exp[index]->ln_i.size() == 0 &&
+               exp[index]->ln.size() == 0 &&
+               exp[index]->add.size() == 0 )
+            {
+                nItem++;
+                sum -= exp[index]->ln_c[0]->positveInterger;
+                
+                //keep only one exp[i] for negative result, delete others
+                if(firstNegativeIndex == -1)
+                {
+                    firstNegativeIndex = index;
+                    index++;
+                }
+                else
+                {
+                    delete exp[index];
+                    exp.erase(exp.begin()+index);
+                }
+            }
+            else index++;
+        }
+        
+        //For add
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nZero)
+            {
+                nItem++;
+                add[i]->nZero = false;
+            }
+            if(add[i]->nNegative)
+            {
+                nItem++;
+                sum += -1;
+                add[i]->nNegative = false;
+            }
+            if(add[i]->positveInterger !=0)
+            {
+                nItem++;
+                sum += add[i]->positveInterger;
+                add[i]->positveInterger = 0;
+            }
+        }
+        
+        //modify to make the result
+        if(nItem >= 2)
+        {
+            if(sum == -1) nNegative = true;
+            else nNegative = false;
+            
+            if(sum >= 1) positveInterger = sum;
+            else positveInterger = 0;
+            
+            //For exp
+            if(sum <= -2)
+            {
+                if(firstNegativeIndex >= 0)
+                {
+                    exp[firstNegativeIndex]->ln_c[0]->positveInterger = -sum;
+                }
+                else
+                {
+                    Addition* c = new Addition(1,-sum);
+                    Addition* ln_c = new Addition(2,c);
+                    Addition* n1 = new Addition("-1");
+                    
+                    ln_c->ln_n1.push_back(n1);
+                    n1->mother = ln_c;
+                    n1->motherType = 2;
+                    
+                    exp.push_back(ln_c);
+                    ln_c->mother = this;
+                    ln_c->motherType = 1;
+                }
+            }
+            else
+            {
+                if(firstNegativeIndex >= 0)
+                {
+                    delete exp[firstNegativeIndex];
+                    exp.erase(exp.begin()+firstNegativeIndex);
+                }
+            }
+            
+            //For add
+            eraseEmptyElement(add);
+            
+            //For nZero, after eraseEmptyElement
+            if(isEmpty()) nZero = true;
+            else nZero = false;
+            
+            cout<<"addCommonTerm: interger"<<endl;
+            getTopmost()->print();
+        }
+    }
+    
+    //For Type 1b
+    
+    //For Type 1c
     
     //For Type 2
-    
-    //For Type 3
 }
 
 void Addition::simplification()
@@ -2479,12 +2597,6 @@ void Addition::simplification()
     exp0();
     
     //----------------------
-    //For example:
-    //  EXP[ ln(-1) + ln(-1) + x ]
-    //= EXP[ ln(1) + x ]            (log formula)
-    //= EXP[ x ]                    (ln(1) = 0)
-    
-    //----------------------
     //log formula:
     //EXP[ ln(i) + ln(i) + x ] = //EXP[ ln(-1) + x ]
     //EXP[ ln(-1) + ln(-1) + x ] = //EXP[ ln(1) + x ]
@@ -2536,7 +2648,11 @@ void Addition::simplification()
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
     //need classifyln
-    classifyln();
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        exp[i]->classifyln();
+    }
+    addCommonTerm();
     
     //----------------------
     //Euler formula:

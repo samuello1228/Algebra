@@ -40,8 +40,8 @@ int main()
     delete test1;
     */
     
-    //*
-    //test classifyln
+    /*
+    /test classifyln
     Addition* test1 = new Addition("\\ln(\\tau)");
     test1->ln[0]->nTau = false;
     
@@ -52,7 +52,7 @@ int main()
     test1->print();
     test1->simplification();
     delete test1;
-    //*/
+    */
     
     /*
     //test cleanAdd and explnCancellation
@@ -97,15 +97,20 @@ int main()
     delete test;
     */
     
-    /*
+    //*
     //test addCommonTerm
-    Addition* test = new Addition("\\exp(\\ln(2) + \\ln(-1)) + \\exp(\\ln(2) + \\ln(-1))");
+    //Addition* test = new Addition("0");
+    //Addition* test = new Addition("2");
+    //Addition* test = new Addition("-1");
+    //Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2))");
+    //Addition* test = new Addition("0+2+1 + (-1)");
+    Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2)) + \\exp(\\ln(-1) + \\ln(2)) + (-1) +3");
     //Addition* test = new Addition("x + \\exp(\\ln(2) + \\ln(x))");
     
     test->print();
-    test->addCommonTerm();
+    test->simplification();
     delete test;
-    */
+    //*/
     
     //delete
     delete zero;
