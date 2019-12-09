@@ -1732,6 +1732,12 @@ void Addition::cleanAdd()
     {
         for(unsigned int j = 0; j < add[i]->add.size() ; j++)
         {
+            //add[i]->add[j]->exp.size must be 0
+            //add[i]->add[j]->ln.size must be 0
+            //because the cleanAdd is done for lower depth
+            //Hence, after add.push_back(add[i]->add[j])
+            //For all k, add[k]->exp.size must be 0 and add[k]->ln.size must be 0
+            
             add.push_back(add[i]->add[j]);
             add[i]->add[j]->mother = this;
             isChanged = true;
@@ -1861,6 +1867,11 @@ void Addition::explnCancellation()
         getTopmost()->print();
     }
     isChanged = false;
+    
+    //no need to do explnCancellation for this->add
+    //because the cleanAdd is done for this->add[i]
+    //this->add[i]->exp.size must be 0, this->add[i]->ln.size must be 0
+    
 }
 
 void Addition::ln0()
@@ -2209,18 +2220,17 @@ void Addition::simplification()
     
     //----------------------
     //For example:
-    //\exp(\ln( (x) + (\exp(x)) )) = \exp(\ln( (x) + \exp(x) ))  (cleanAdd)
-    //                             = ((x) + \exp(x))             (explnCancellation)
-    //                             = (x) + \exp(x)               (cleanAdd)
-    
-    //----------------------
-    //(exp(x_1)+exp(x_2)+...) + (exp(y_1)+exp(y_2)+...) + ... = exp(x_1)+exp(x_2)+... + exp(y_1)+exp(y_2)+... + ...
-    //( ln(x_1)+ ln(x_2)+...) + ( ln(y_1)+ ln(y_2)+...) + ... =  ln(x_1)+ ln(x_2)+... +  ln(y_1)+ ln(y_2)+... + ...
-    cleanAdd();
+    //\exp(\ln( (x) + \exp(x) )) = ((x) + \exp(x))             (explnCancellation)
+    //                           = (x) + \exp(x)               (cleanAdd)
     
     //exp(ln(x)) + y = (x) + y
     //EXP[ ln(exp(x)) + y ] = EXP[ (x) + y ]
     explnCancellation();
+    
+    //----------------------
+    //(exp(x_1)+exp(x_2)+...) + (exp(y_1)+exp(y_2)+...) + ... = exp(x_1)+exp(x_2)+... + exp(y_1)+exp(y_2)+... + ...
+    //( ln(x_1)+ ln(x_2)+...) + ( ln(y_1)+ ln(y_2)+...) + ... =  ln(x_1)+ ln(x_2)+... +  ln(y_1)+ ln(y_2)+... + ...
+    //(0) + (2) + ((-1)) + (tau) + (i) + ((-inf)) + (x) + (y) + (z) = 0 + 2 + (-1) + tau + i + (-inf) + x + y + z
     cleanAdd();
     //better search for EXP[]
     //----------------------

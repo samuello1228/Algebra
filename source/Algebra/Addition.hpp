@@ -69,8 +69,9 @@ public:
     
     void basicArithmetic();
     void cleanAddOld();
-    void cleanAdd();
+    
     void explnCancellation();
+    void cleanAdd();
     
     void ln0();
     void addInf();
