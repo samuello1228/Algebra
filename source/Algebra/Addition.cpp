@@ -81,7 +81,7 @@ void eraseEmptyElement(vector<Addition*>& list)
 }
 
 void updateDepthOrder(unsigned int& depth1, unsigned int& orderType1, int& order1,
-                   unsigned int depth2, unsigned int orderType2, int order2)
+                      unsigned int depth2, unsigned int orderType2, int order2)
 {
     if(depth2 > depth1) depth1 = depth2;
     
@@ -773,7 +773,7 @@ string Addition::getLatex()
     
     if(nTau)
     {
-        output += " + \\tau";
+        output += " + \\\\tau";
     }
     
     if(nComplex)
@@ -783,7 +783,7 @@ string Addition::getLatex()
     
     if(nInfinity)
     {
-        output += " + (-\\infty)";
+        output += " + (-\\\\infty)";
     }
     
     for(unsigned int i = 0; i < variable.size() ; i++)
@@ -807,35 +807,35 @@ string Addition::getLatex()
     
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
-        output += " + \\exp(";
+        output += " + \\\\exp(";
         output += exp[i]->getLatex();
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
     {
-        output += " + \\ln(";
+        output += " + \\\\ln(";
         output += ln_n1[i]->getLatex();
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_c.size() ; i++)
     {
-        output += " + \\ln(";
+        output += " + \\\\ln(";
         output += ln_c[i]->getLatex();
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
     {
-        output += " + \\ln(";
+        output += " + \\\\ln(";
         output += ln_i[i]->getLatex();
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
-        output += " + \\ln(";
+        output += " + \\\\ln(";
         output += ln[i]->getLatex();
         output += ")";
     }
@@ -857,7 +857,7 @@ string Addition::getLatex()
     
     //erase "(" and ")"
     if(output == "(-1)") output = "-1";
-    else if(output == "(-\\infty)") output = "-\\infty";
+    else if(output == "(-\\\\infty)") output = "-\\\\infty";
     
     return output;
 }
@@ -865,6 +865,42 @@ string Addition::getLatex()
 void Addition::print()
 {
     cout<<getLatex()<<endl;
+    
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        if(exp[i]->mother != this) cout<<"Error: exp: the mother link is wrong"<<endl;
+        if(exp[i]->motherType != 1) cout<<"Error: exp: the motherType is wrong"<<endl;
+    }
+    
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        if(ln_n1[i]->mother != this) cout<<"Error: ln_n1: the mother link is wrong"<<endl;
+        if(ln_n1[i]->motherType != 2) cout<<"Error: ln_n1: the motherType is wrong"<<endl;
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        if(ln_c[i]->mother != this) cout<<"Error: ln_c: the mother link is wrong"<<endl;
+        if(ln_c[i]->motherType != 2) cout<<"Error: ln_c: the motherType is wrong"<<endl;
+    }
+    
+    for(unsigned int i = 0; i < ln_i.size() ; i++)
+    {
+        if(ln_i[i]->mother != this) cout<<"Error: ln_i: the mother link is wrong"<<endl;
+        if(ln_i[i]->motherType != 2) cout<<"Error: ln_i: the motherType is wrong"<<endl;
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        if(ln[i]->mother != this) cout<<"Error: ln: the mother link is wrong"<<endl;
+        if(ln[i]->motherType != 2) cout<<"Error: ln: the motherType is wrong"<<endl;
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        if(add[i]->mother != this) cout<<"Error: add: the mother link is wrong"<<endl;
+        if(add[i]->motherType != 3) cout<<"Error: add: the motherType is wrong"<<endl;
+    }
 }
 
 Addition* Addition::getCopy()
@@ -2204,28 +2240,24 @@ void Addition::expand()
             if(oldExplnItem->nNegative)
             {
                 newExpItem->ln[lnIndex] = new Addition("-1");
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->nNegative = false;
             }
             else if(oldExplnItem->positveInterger != 0)
             {
                 newExpItem->ln[lnIndex] = new Addition(1,oldExplnItem->positveInterger);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->positveInterger = 0;
             }
             else if(oldExplnItem->nTau)
             {
                 newExpItem->ln[lnIndex] = new Addition("\\tau");
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->nTau = false;
             }
             else if(oldExplnItem->nComplex)
             {
                 newExpItem->ln[lnIndex] = new Addition("i");
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->nComplex = false;
             }
@@ -2236,7 +2268,6 @@ void Addition::expand()
                     if(oldExplnItem->variable[i])
                     {
                         newExpItem->ln[lnIndex] = new Addition(2,i);
-                        exp.insert(exp.begin()+index1,newExpItem);
                         
                         oldExplnItem->variable[i] = false;
                         
@@ -2247,45 +2278,46 @@ void Addition::expand()
             else if(oldExplnItem->exp.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(1,oldExplnItem->exp[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->exp.erase(oldExplnItem->exp.begin());
             }
             else if(oldExplnItem->ln_n1.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_n1[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->ln_n1.erase(oldExplnItem->ln_n1.begin());
             }
             else if(oldExplnItem->ln_c.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_c[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->ln_c.erase(oldExplnItem->ln_c.begin());
             }
             else if(oldExplnItem->ln_i.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_i[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->ln_i.erase(oldExplnItem->ln_i.begin());
             }
             else if(oldExplnItem->ln.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->ln.erase(oldExplnItem->ln.begin());
             }
             else if(oldExplnItem->add.size() >= 1)
             {
                 newExpItem->ln[lnIndex] = new Addition(3,oldExplnItem->add[0]);
-                exp.insert(exp.begin()+index1,newExpItem);
                 
                 oldExplnItem->add.erase(oldExplnItem->add.begin());
             }
+            
+            newExpItem->ln[lnIndex]->mother = newExpItem->ln[lnIndex];
+            newExpItem->ln[lnIndex]->motherType = 2;
+            
+            exp.insert(exp.begin()+index1,newExpItem);
+            newExpItem->mother = this;
+            newExpItem->motherType = 1;
             
             cout<<"Expand:"<<endl;
             getTopmost()->print();
