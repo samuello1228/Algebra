@@ -1132,6 +1132,30 @@ bool Addition::haveOnlyComplex()
     return true;
 }
 
+bool Addition::haveOnlyInf()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(positveInterger != 0) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(!nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
 void Addition::basicArithmetic()
 {
     for(unsigned int i = 0; i < exp.size() ; i++)
@@ -1839,6 +1863,144 @@ void Addition::explnCancellation()
     isChanged = false;
 }
 
+void Addition::ln0()
+{
+    //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
+    bool isChanged = false;
+    int index = 0;
+    while(true)
+    {
+        if(index >= ln.size()) break;
+        
+        if(ln[index]->haveOnlyZero())
+        {
+            delete ln[index];
+            ln.erase(ln.begin()+index);
+            
+            Addition* inf = new Addition("-\\infty");
+            
+            add.push_back(inf);
+            inf->mother = this;
+            inf->motherType = 3;
+            
+            isChanged = true;
+        }
+        else index++;
+    }
+    
+    if(isChanged)
+    {
+        cout<<"ln0: ln(0) = -inf"<<endl;
+        getTopmost()->print();
+    }
+}
+
+void Addition::addInf()
+{
+    if(haveOnlyInf()) return;
+    
+    bool existInfinity = nInfinity;
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        if(add[i]->nInfinity) existInfinity = true;
+    }
+    
+    //erase all elements in add
+    if(existInfinity)
+    {
+        nZero = false;
+        nNegative = false;
+        positveInterger = 0;
+        nTau = false;
+        nComplex = false;
+        nInfinity = true;
+        
+        for(unsigned int i = 0; i < variable.size() ; i++)
+        {
+            variable[i] = false;
+        }
+        
+        for(unsigned int i = 0; i < exp.size() ; i++)
+        {
+            delete exp[i];
+        }
+        
+        for(unsigned int i = 0; i < ln.size() ; i++)
+        {
+            delete ln[i];
+        }
+        
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            delete add[i];
+        }
+        
+        exp.clear();
+        ln.clear();
+        add.clear();
+        
+        cout<<"addInf: -inf + x = -inf"<<endl;
+        getTopmost()->print();
+        return;
+    }
+}
+
+void Addition::expInf()
+{
+    bool isChanged = false;
+    int index = 0;
+    while(true)
+    {
+        if(index >= exp.size()) break;
+        
+        if(exp[index]->nInfinity)
+        {
+            delete exp[index];
+            exp.erase(exp.begin()+index);
+            isChanged = true;
+        }
+        else index++;
+    }
+    
+    if(isChanged)
+    {
+        if(isEmpty()) nZero = true;
+        cout<<"expInf: exp(-inf) = 0"<<endl;
+        getTopmost()->print();
+    }
+}
+
+void Addition::exp0()
+{
+    bool isChanged = false;
+    int index = 0;
+    while(true)
+    {
+        if(index >= exp.size()) break;
+        
+        if(exp[index]->haveOnlyZero())
+        {
+            delete exp[index];
+            exp.erase(exp.begin()+index);
+            
+            Addition* one = new Addition(1,1);
+            
+            add.push_back(one);
+            one->mother = this;
+            one->motherType = 3;
+            
+            isChanged = true;
+        }
+        else index++;
+    }
+    
+    if(isChanged)
+    {
+        cout<<"exp0: exp(0) = 1"<<endl;
+        getTopmost()->print();
+    }
+}
+
 void Addition::basicMultiplication()
 {
     explnCancellation();
@@ -1977,51 +2139,6 @@ void Addition::basicMultiplication()
     getTopmost()->print();
 }
 
-void Addition::exp0()
-{
-    explnCancellation();
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->exp0();
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        ln[i]->exp0();
-    }
-    
-    bool isChanged = false;
-    int index = 0;
-    while(true)
-    {
-        if(index >= exp.size()) break;
-        
-        if(exp[index]->haveOnlyZero())
-        {
-            delete exp[index];
-            exp.erase(exp.begin()+index);
-            
-            Addition* one = new Addition(1,1);
-            
-            add.push_back(one);
-            one->mother = this;
-            one->motherType = 3;
-            
-            isChanged = true;
-        }
-        else index++;
-    }
-    
-    if(isChanged)
-    {
-        cout<<"exp0: exp(0) = 1"<<endl;
-        getTopmost()->print();
-    }
-    
-    cleanAddOld();
-}
-
 void Addition::addCommonTerm()
 {
     cleanAddOld();
@@ -2115,13 +2232,17 @@ void Addition::simplification()
     
     //----------------------
     //EXP[ ln(0) + x ]  = EXP[ -inf + x ]
+    ln0();
     
     //----------------------
     //-inf + x = -inf
+    addInf();
     
     //----------------------
     //exp(-inf) = 0
+    expInf();
     //exp(0) = 1
+    exp0();
     
     //----------------------
     //For example:

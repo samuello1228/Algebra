@@ -65,14 +65,19 @@ public:
     bool haveOnlyNegativeOne();
     bool haveOnlyPositveInterger();
     bool haveOnlyComplex();
+    bool haveOnlyInf();
     
     void basicArithmetic();
     void cleanAddOld();
     void cleanAdd();
     void explnCancellation();
     
-    void basicMultiplication();
+    void ln0();
+    void addInf();
+    void expInf();
     void exp0();
+    
+    void basicMultiplication();
     void addCommonTerm();
     void simplification();
 };

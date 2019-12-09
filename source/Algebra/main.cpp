@@ -50,10 +50,19 @@ int main()
     delete test1;
     */
     
-    //*
+    /*
     //test explnCancellation
     Addition* test1 = new Addition("\\exp(\\ln( (x) + \\exp(x) ))");
     //Addition* test1 = new Addition("\\exp(\\ln(\\exp(x+1)) + \\ln(\\exp(x+1)) + y)");
+    test1->print();
+    test1->simplification();
+    delete test1;
+    */
+    
+    //*
+    //test constant calculation
+    Addition* test1 = new Addition("\\exp(\\ln(0) + x)");
+    //Addition* test1 = new Addition("\\exp(0)");
     test1->print();
     test1->simplification();
     delete test1;
