@@ -85,7 +85,7 @@ int main()
     delete test;
     */
     
-    /*
+    //*
     //test expand
     Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) )");
     //Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) ) + \\exp(\\ln(\\tau + x) + \\ln(\\tau + x) )");
@@ -95,9 +95,9 @@ int main()
     test->print();
     test->simplification();
     delete test;
-    */
+    //*/
     
-    //*
+    /*
     //test addCommonTerm
     //Addition* test = new Addition("0");
     //Addition* test = new Addition("2");
@@ -110,7 +110,7 @@ int main()
     test->print();
     test->simplification();
     delete test;
-    //*/
+    */
     
     //delete
     delete zero;

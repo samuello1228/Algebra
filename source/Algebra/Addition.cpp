@@ -143,7 +143,7 @@ Addition::Addition(string latex)
     
     if(trim.size() == 0)
     {
-        cout<<"Syntax Error: the expression is empty"<<endl;
+        cout<<"Syntax Error: Constructor for latex: the expression is empty"<<endl;
         return;
     }
     
@@ -851,7 +851,7 @@ string Addition::getLatex()
     //erase " + "
     if(output.size() == 0)
     {
-        cout<<"Error: the expression is empty"<<endl;
+        cout<<"Error: getLatex: the expression is empty"<<endl;
     }
     else output.erase(0,3);
     
@@ -997,7 +997,7 @@ void Addition::fillDepthOrder()
 {
     if(isEmpty())
     {
-        cout<<"Error: the expression is empty"<<endl;
+        cout<<"Error: fillDepthOrder: the expression is empty"<<endl;
         return;
     }
     
@@ -2390,18 +2390,23 @@ void Addition::addCommonTerm()
     {
         int sum = 0; //the sum of all integer
         int nItem = 0; //number of integer
+        int nCase = 0; //number of irreducible case, except the result is 0
         int firstNegativeIndex = -1; //keep only one exp[i] for negative result, delete others
         
-        //fill sum, nItem, firstNegativeIndex, remove other exp[i], remove all integer in add
+        //fill sum, nItem, nCase, firstNegativeIndex, remove other exp[i], remove all integer in add
         if(nZero) nItem++;
+        if(haveOnlyZero()) nCase++;
+        
         if(nNegative)
         {
             nItem++;
+            nCase++;
             sum += -1;
         }
         if(positveInterger != 0)
         {
             nItem++;
+            nCase++;
             sum += positveInterger;
         }
         
@@ -2425,6 +2430,7 @@ void Addition::addCommonTerm()
                exp[index]->add.size() == 0 )
             {
                 nItem++;
+                nCase++;
                 sum -= exp[index]->ln_c[0]->positveInterger;
                 
                 //keep only one exp[i] for negative result, delete others
@@ -2464,8 +2470,10 @@ void Addition::addCommonTerm()
             }
         }
         
+        if(nItem == 0 && !isEmpty()) nCase++;
+        
         //modify to make the result
-        if(nItem >= 2)
+        if(nCase != 1)
         {
             if(sum == -1) nNegative = true;
             else nNegative = false;
