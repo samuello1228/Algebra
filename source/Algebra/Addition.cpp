@@ -125,7 +125,8 @@ Addition::Addition()
     
     nZero = false;
     nNegative = false;
-    positveInterger = 0;
+    nOne = false;
+    nTwo = false;
     nTau = false;
     nComplex = false;
     nInfinity = false;
@@ -211,7 +212,8 @@ Addition::Addition(string latex)
                 
                 nZero = false;
                 nNegative = false;
-                positveInterger = 0;
+                nOne = false;
+                nTwo = false;
                 nTau = false;
                 nComplex = false;
                 nInfinity = false;
@@ -276,7 +278,8 @@ Addition::Addition(string latex)
                 
                 nZero = false;
                 nNegative = false;
-                positveInterger = 0;
+                nOne = false;
+                nTwo = false;
                 nTau = false;
                 nComplex = false;
                 nInfinity = false;
@@ -336,13 +339,14 @@ Addition::Addition(string latex)
                 
                 nZero = false;
                 nNegative = false;
-                positveInterger = 0;
+                nOne = false;
+                nTwo = false;
                 nTau = false;
                 nComplex = false;
                 nInfinity = false;
                 
                 if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-                else if(operand->haveOnlyPositveInterger()) ln_c.push_back(operand);
+                else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_c.push_back(operand);
                 else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
                 else ln.push_back(operand);
                 
@@ -365,7 +369,46 @@ Addition::Addition(string latex)
         
         nZero = true;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
+        nTau = false;
+        nComplex = false;
+        nInfinity = false;
+        return;
+    }
+    else if(trim.size() == 1 && trim[0] == '1')
+    {
+        //For 0
+        mother = nullptr;
+        motherType = 0;
+        
+        depth = 1;
+        orderType = 1;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        nOne = true;
+        nTwo = false;
+        nTau = false;
+        nComplex = false;
+        nInfinity = false;
+        return;
+    }
+    else if(trim.size() == 1 && trim[0] == '2')
+    {
+        //For 0
+        mother = nullptr;
+        motherType = 0;
+        
+        depth = 1;
+        orderType = 1;
+        order = 0;
+        
+        nZero = false;
+        nNegative = false;
+        nOne = false;
+        nTwo = true;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -383,7 +426,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = true;
         nInfinity = false;
@@ -401,7 +445,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -420,7 +465,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -440,7 +486,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -461,7 +508,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = true;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -479,7 +527,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = true;
         nComplex = false;
         nInfinity = false;
@@ -497,12 +546,14 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = true;
         return;
     }
+    /*
     else if(trim[0] != '0' && std::isdigit(trim[0]))
     {
         //For positive integer
@@ -540,7 +591,7 @@ Addition::Addition(string latex)
             }
         }
     }
-    
+    */
     {
         cout<<"Syntax Error: the expression cannot be processed"<<endl;
         
@@ -553,7 +604,8 @@ Addition::Addition(string latex)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -576,7 +628,22 @@ Addition::Addition(int fundamentalType,unsigned int x)
         
         nZero = false;
         nNegative = false;
-        positveInterger = x;
+        
+        if(x == 1)
+        {
+            nOne = true;
+            nTwo = false;
+        }
+        else if(x == 2)
+        {
+            nOne = false;
+            nTwo = true;
+        }
+        else
+        {
+            cout<<"Syntax Error: the integer need to be 1 or 2."<<endl;
+        }
+        
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -594,7 +661,8 @@ Addition::Addition(int fundamentalType,unsigned int x)
         
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
@@ -630,7 +698,8 @@ Addition::Addition(int compositeType, Addition* operand)
     
     nZero = false;
     nNegative = false;
-    positveInterger = 0;
+    nOne = false;
+    nTwo = false;
     nTau = false;
     nComplex = false;
     nInfinity = false;
@@ -639,7 +708,7 @@ Addition::Addition(int compositeType, Addition* operand)
     else if(compositeType == 2)
     {
         if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-        else if(operand->haveOnlyPositveInterger()) ln_c.push_back(operand);
+        else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_c.push_back(operand);
         else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
         else ln.push_back(operand);
     }
@@ -705,7 +774,8 @@ Addition::Addition(Addition* operand1, Addition* operand2)
     
     nZero = false;
     nNegative = false;
-    positveInterger = 0;
+    nOne = false;
+    nTwo = false;
     nTau = false;
     nComplex = false;
     nInfinity = false;
@@ -765,11 +835,23 @@ string Addition::getLatex()
         output += " + (-1)";
     }
     
+    if(nOne)
+    {
+        output += " + 1";
+    }
+    
+    if(nTwo)
+    {
+        output += " + 2";
+    }
+    
+    /*
     if(positveInterger != 0)
     {
         output += " + ";
         output += std::to_string(positveInterger);
     }
+    */
     
     if(nTau)
     {
@@ -952,7 +1034,8 @@ Addition* Addition::getCopy()
     
     copy->nZero = nZero;
     copy->nNegative = nNegative;
-    copy->positveInterger = positveInterger;
+    copy->nOne = nOne;
+    copy->nTwo = nTwo;
     copy->nTau = nTau;
     copy->nComplex = nComplex;
     copy->nInfinity = nInfinity;
@@ -1098,7 +1181,7 @@ void Addition::classifyln()
             ln_n1.push_back(ln[index]);
             ln.erase(ln.begin()+index);
         }
-        else if(ln[index]->haveOnlyPositveInterger())
+        else if(ln[index]->haveOnlyOne() || ln[index]->haveOnlyTwo())
         {
             ln_c.push_back(ln[index]);
             ln.erase(ln.begin()+index);
@@ -1116,7 +1199,8 @@ bool Addition::isEmpty()
 {
     if(nZero) return false;
     if(nNegative) return false;
-    if(positveInterger != 0) return false;
+    if(nOne) return false;
+    if(nTwo) return false;
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
@@ -1140,7 +1224,8 @@ bool Addition::haveOnlyZero()
 {
     if(!nZero) return false;
     if(nNegative) return false;
-    if(positveInterger != 0) return false;
+    if(nOne) return false;
+    if(nTwo) return false;
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
@@ -1164,7 +1249,8 @@ bool Addition::haveOnlyNegativeOne()
 {
     if(nZero) return false;
     if(!nNegative) return false;
-    if(positveInterger != 0) return false;
+    if(nOne) return false;
+    if(nTwo) return false;
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
@@ -1184,11 +1270,37 @@ bool Addition::haveOnlyNegativeOne()
     return true;
 }
 
-bool Addition::haveOnlyPositveInterger()
+bool Addition::haveOnlyOne()
 {
     if(nZero) return false;
     if(nNegative) return false;
-    if(positveInterger == 0) return false;
+    if(!nOne) return false;
+    if(nTwo) return false;
+    if(nTau) return false;
+    if(nComplex) return false;
+    if(nInfinity) return false;
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    if(exp.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_c.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    if(add.size() != 0) return false;
+    
+    return true;
+}
+
+bool Addition::haveOnlyTwo()
+{
+    if(nZero) return false;
+    if(nNegative) return false;
+    if(nOne) return false;
+    if(!nTwo) return false;
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
@@ -1212,7 +1324,8 @@ bool Addition::haveOnlyComplex()
 {
     if(nZero) return false;
     if(nNegative) return false;
-    if(positveInterger != 0) return false;
+    if(nOne) return false;
+    if(nTwo) return false;
     if(nTau) return false;
     if(!nComplex) return false;
     if(nInfinity) return false;
@@ -1236,7 +1349,8 @@ bool Addition::haveOnlyInf()
 {
     if(nZero) return false;
     if(nNegative) return false;
-    if(positveInterger != 0) return false;
+    if(nOne) return false;
+    if(nTwo) return false;
     if(nTau) return false;
     if(nComplex) return false;
     if(!nInfinity) return false;
@@ -1259,8 +1373,11 @@ bool Addition::haveOnlyInf()
 bool Addition::haveOnlyOneItem()
 {
     int sum = 0;
+    
+    if(nZero) sum++;
     if(nNegative) sum++;
-    if(positveInterger != 0) sum++;
+    if(nOne) sum++;
+    if(nTwo) sum++;
     if(nTau) sum++;
     if(nComplex) sum++;
     
@@ -1280,6 +1397,7 @@ bool Addition::haveOnlyOneItem()
     else return false;
 }
 
+/*
 void Addition::basicArithmetic()
 {
     for(unsigned int i = 0; i < exp.size() ; i++)
@@ -1379,7 +1497,9 @@ void Addition::basicArithmetic()
         }
     }
 }
+*/
 
+/*
 void Addition::cleanAddOld()
 {
     basicArithmetic();
@@ -1761,6 +1881,7 @@ void Addition::cleanAddOld()
         cout<<"Error: cannot clean add"<<endl;
     }
 }
+*/
 
 void Addition::cleanAdd()
 {
@@ -1895,7 +2016,8 @@ void Addition::explnCancellation()
         
         if(exp[index]->nZero) {index++; continue;}
         if(exp[index]->nNegative) {index++; continue;}
-        if(exp[index]->positveInterger != 0) {index++; continue;}
+        if(exp[index]->nOne) {index++; continue;}
+        if(exp[index]->nTwo) {index++; continue;}
         if(exp[index]->nTau) {index++; continue;}
         if(exp[index]->nComplex) {index++; continue;}
         if(exp[index]->nInfinity) {index++; continue;}
@@ -1952,7 +2074,8 @@ void Addition::explnCancellation()
         
         if(ln[index]->nZero) {index++; continue;}
         if(ln[index]->nNegative) {index++; continue;}
-        if(ln[index]->positveInterger != 0) {index++; continue;}
+        if(ln[index]->nOne) {index++; continue;}
+        if(ln[index]->nTwo) {index++; continue;}
         if(ln[index]->nTau) {index++; continue;}
         if(ln[index]->nComplex) {index++; continue;}
         if(ln[index]->nInfinity) {index++; continue;}
@@ -2054,7 +2177,8 @@ void Addition::addInf()
     {
         nZero = false;
         nNegative = false;
-        positveInterger = 0;
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = true;
@@ -2242,7 +2366,7 @@ void Addition::ln_1nic()
         int count_c = 0;
         for(unsigned int j = 0; j < ln_c.size() ; j++)
         {
-            if(ln_c[j]->positveInterger == 1)
+            if(ln_c[j]->nOne)
             {
                 count_one++;
             }
@@ -2252,7 +2376,7 @@ void Addition::ln_1nic()
             }
         }
         
-        if(count_one >= 1 || count_c >= 2) isChanged = true;
+        if(count_one >= 1) isChanged = true;
     }
     
     //For ln_c
@@ -2263,19 +2387,12 @@ void Addition::ln_1nic()
         {
             if(index >= ln_c.size()) break;
             
-            product *= ln_c[index]->positveInterger;
-            
-            delete ln_c[index];
-            ln_c.erase(ln_c.begin()+index);
-        }
-        
-        if(product >= 2)
-        {
-            Addition* c = new Addition(1,product);
-            
-            ln_c.push_back(c);
-            c->mother = this;
-            c->motherType = 2;
+            if(ln_c[index]->nOne)
+            {
+                delete ln_c[index];
+                ln_c.erase(ln_c.begin()+index);
+            }
+            else index++;
         }
     }
     
@@ -2317,17 +2434,29 @@ void Addition::expand()
             Addition* newExpItem = exp[index1]->getCopy();
             delete newExpItem->ln[lnIndex];
             
-            if(oldExplnItem->nNegative)
+            if(oldExplnItem->nZero)
+            {
+                newExpItem->ln[lnIndex] = new Addition("0");
+                
+                oldExplnItem->nZero = false;
+            }
+            else if(oldExplnItem->nNegative)
             {
                 newExpItem->ln[lnIndex] = new Addition("-1");
                 
                 oldExplnItem->nNegative = false;
             }
-            else if(oldExplnItem->positveInterger != 0)
+            else if(oldExplnItem->nOne)
             {
-                newExpItem->ln[lnIndex] = new Addition(1,oldExplnItem->positveInterger);
+                newExpItem->ln[lnIndex] = new Addition("1");
                 
-                oldExplnItem->positveInterger = 0;
+                oldExplnItem->nOne = false;
+            }
+            else if(oldExplnItem->nTwo)
+            {
+                newExpItem->ln[lnIndex] = new Addition("2");
+                
+                oldExplnItem->nTwo = false;
             }
             else if(oldExplnItem->nTau)
             {
@@ -2439,9 +2568,9 @@ void Addition::addCommonTerm()
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
     
-    bool isChanged = false;
     //For Type 1a
     {
+        /*
         int sum = 0; //the sum of all integer
         int nItem = 0; //number of integer
         int nCase = 0; //number of irreducible case, except the result is 0
@@ -2575,6 +2704,15 @@ void Addition::addCommonTerm()
             
             cout<<"addCommonTerm: interger"<<endl;
             getTopmost()->print();
+        }
+        */
+        
+        bool isChanged = true;
+        while(isChanged)
+        {
+            isChanged = false;
+            
+            
         }
     }
     

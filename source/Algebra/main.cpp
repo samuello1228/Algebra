@@ -23,6 +23,14 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
+    //*
+    //test integer
+    Addition* test1 = new Addition("1+1");
+    test1->print();
+    test1->simplification();
+    delete test1;
+    //*/
+    
     /*
     //test cleanAdd
     Addition* test1 = new Addition("1"); Addition* test2 = new Addition("((-1) + (-1)) + ((-1) + (0))");
@@ -77,15 +85,15 @@ int main()
     //test ln_1nic
     //Addition* test = new Addition("\\exp( \\ln(-1) + \\ln(2) ) + \\exp( \\ln(-1) + \\ln(2) )");
     //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1))");
-    //Addition* test = new Addition("\\exp( \\ln(2) + \\ln(i) + \\ln(i) + \\ln(i)) + \\exp( \\ln(-1) + \\ln(-1) + \\ln(2) + \\ln(2) )");
-    Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1)) + \\exp( \\ln(i) + \\ln(i) + \\ln(i) + \\ln(i) ) + \\ln(x)");
+    Addition* test = new Addition("\\exp( \\ln(2) + \\ln(i) + \\ln(i) + \\ln(i)) + \\exp( \\ln(-1) + \\ln(-1) + \\ln(2) + \\ln(2) )");
+    //Addition* test = new Addition("\\exp( \\ln(1) + \\ln(-1) + \\ln(-1)) + \\exp( \\ln(i) + \\ln(i) + \\ln(i) + \\ln(i) ) + \\ln(x)");
     
     test->print();
     test->simplification();
     delete test;
     */
     
-    //*
+    /*
     //test expand
     Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) )");
     //Addition* test = new Addition("\\exp(\\ln(1 + i) + \\ln(1 + i) ) + \\exp(\\ln(\\tau + x) + \\ln(\\tau + x) )");
@@ -95,7 +103,7 @@ int main()
     test->print();
     test->simplification();
     delete test;
-    //*/
+    */
     
     /*
     //test addCommonTerm

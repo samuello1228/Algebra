@@ -31,7 +31,9 @@ public:
     //Fundamental
     bool nZero; //number of 0
     bool nNegative; //number of -1
-    unsigned int positveInterger; // 1 or 2 or ...
+    bool nOne; //number of 1
+    bool nTwo; //number of 2
+    
     bool nTau; //number of tau = pi/2
     bool nComplex; //number of i
     bool nInfinity; //number of -Infinity
@@ -64,7 +66,8 @@ public:
     bool isEmpty();
     bool haveOnlyZero();
     bool haveOnlyNegativeOne();
-    bool haveOnlyPositveInterger();
+    bool haveOnlyOne();
+    bool haveOnlyTwo();
     bool haveOnlyComplex();
     bool haveOnlyInf();
     bool haveOnlyOneItem();
