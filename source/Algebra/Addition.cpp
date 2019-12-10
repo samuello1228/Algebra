@@ -868,38 +868,74 @@ void Addition::print()
     
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
-        if(exp[i]->mother != this) cout<<"Error: exp: the mother link is wrong"<<endl;
-        if(exp[i]->motherType != 1) cout<<"Error: exp: the motherType is wrong"<<endl;
+        if(exp[i]->mother != this)
+        {
+            cout<<"Error: exp["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(exp[i]->motherType != 1)
+        {
+            cout<<"Error: exp["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
     {
-        if(ln_n1[i]->mother != this) cout<<"Error: ln_n1: the mother link is wrong"<<endl;
-        if(ln_n1[i]->motherType != 2) cout<<"Error: ln_n1: the motherType is wrong"<<endl;
+        if(ln_n1[i]->mother != this)
+        {
+            cout<<"Error: ln_n1["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_n1[i]->motherType != 2)
+        {
+            cout<<"Error: ln_n1["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_c.size() ; i++)
     {
-        if(ln_c[i]->mother != this) cout<<"Error: ln_c: the mother link is wrong"<<endl;
-        if(ln_c[i]->motherType != 2) cout<<"Error: ln_c: the motherType is wrong"<<endl;
+        if(ln_c[i]->mother != this)
+        {
+            cout<<"Error: ln_c["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_c[i]->motherType != 2)
+        {
+            cout<<"Error: ln_c["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
     {
-        if(ln_i[i]->mother != this) cout<<"Error: ln_i: the mother link is wrong"<<endl;
-        if(ln_i[i]->motherType != 2) cout<<"Error: ln_i: the motherType is wrong"<<endl;
+        if(ln_i[i]->mother != this)
+        {
+            cout<<"Error: ln_i["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_i[i]->motherType != 2)
+        {
+            cout<<"Error: ln_i["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
-        if(ln[i]->mother != this) cout<<"Error: ln: the mother link is wrong"<<endl;
-        if(ln[i]->motherType != 2) cout<<"Error: ln: the motherType is wrong"<<endl;
+        if(ln[i]->mother != this)
+        {
+            cout<<"Error: ln["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln[i]->motherType != 2)
+        {
+            cout<<"Error: ln["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        if(add[i]->mother != this) cout<<"Error: add: the mother link is wrong"<<endl;
-        if(add[i]->motherType != 3) cout<<"Error: add: the motherType is wrong"<<endl;
+        if(add[i]->mother != this)
+        {
+            cout<<"Error: add["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(add[i]->motherType != 3)
+        {
+            cout<<"Error: add["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
 }
 
@@ -929,7 +965,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
         Addition* element = exp[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 1;
         
         copy->exp.push_back(element);
@@ -938,7 +974,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
     {
         Addition* element = ln_n1[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 2;
         
         copy->ln_n1.push_back(element);
@@ -947,7 +983,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < ln_c.size() ; i++)
     {
         Addition* element = ln_c[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 2;
         
         copy->ln_c.push_back(element);
@@ -956,7 +992,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < ln_i.size() ; i++)
     {
         Addition* element = ln_i[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 2;
         
         copy->ln_i.push_back(element);
@@ -965,7 +1001,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         Addition* element = ln[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 2;
         
         copy->ln.push_back(element);
@@ -974,7 +1010,7 @@ Addition* Addition::getCopy()
     for(unsigned int i = 0; i < add.size() ; i++)
     {
         Addition* element = add[i]->getCopy();
-        element->mother = this;
+        element->mother = copy;
         element->motherType = 3;
         
         copy->add.push_back(element);
@@ -2198,7 +2234,7 @@ void Addition::ln_1nic()
             }
         }
         
-        if(count_one >= 1 && count_c >= 2) isChanged = true;
+        if(count_one >= 1 || count_c >= 2) isChanged = true;
     }
     
     //For ln_c
@@ -2338,7 +2374,7 @@ void Addition::expand()
                 oldExplnItem->add.erase(oldExplnItem->add.begin());
             }
             
-            newExpItem->ln[lnIndex]->mother = newExpItem->ln[lnIndex];
+            newExpItem->ln[lnIndex]->mother = newExpItem;
             newExpItem->ln[lnIndex]->motherType = 2;
             
             exp.insert(exp.begin()+index1,newExpItem);
@@ -2548,6 +2584,9 @@ void Addition::simplification()
         add[i]->simplification();
     }
     
+    //cout<<"start simplifying:"<<endl;
+    //print();
+    
     //implicit done in the following functions
     //x + (0) = x
     
@@ -2620,6 +2659,19 @@ void Addition::simplification()
     //= EXP[ exp(ln(2) + ln(tau) + ln(i)) + exp(ln(-1) + ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ] (Expand)
     //= EXP[ exp(ln(tau) + ln(i)) + exp(ln(-1) + ln(x) + ln(i)) + y ]                                         (addCommonTerm)
     //= EXP[ ln(i) + exp( ln(-1) + ln(x) + ln(i)) + y ]                                                       (Euler formula)
+    
+    //----------------------
+    //For example:
+    //  exp( ln(1+i) + ln(1+i) )
+    //= exp( ln(1) + ln(1+i) ) + exp( ln(i) + ln(x+y) )                    (expand)
+    //= exp( ln(1+i) ) + exp( ln(i) + ln(1+i) )                            (ln_1nic for lower depth)
+    //= exp(ln(1)) + exp(ln(i)) + exp( ln(i) + ln(1+i) )                   (expand)
+    //= exp(0) + exp(ln(i)) + exp( ln(i) + ln(1+i) )                       (ln(1) for lower depth)
+    //= exp(0) + exp(ln(i)) + exp( ln(i) + ln(1) ) + exp( ln(i) + ln(i) )  (ln(1) for lower depth)
+    //= exp(0) + exp(ln(i)) + exp(ln(i)) + exp(ln(-1))                     (ln_1nic for lower depth)
+    //= exp(0) + (i) + (i) + (-1)                                          (explnCancellation)
+    //= (1) + (i) + (i) + (-1)                                             (exp0)
+    //= exp(ln(2) + ln(i))                                                 (addCommonTerm)
     
     //----------------------
     //Expand:
