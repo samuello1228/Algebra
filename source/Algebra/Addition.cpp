@@ -2069,6 +2069,21 @@ void Addition::addInf()
             delete exp[i];
         }
         
+        for(unsigned int i = 0; i < ln_n1.size() ; i++)
+        {
+            delete ln_n1[i];
+        }
+        
+        for(unsigned int i = 0; i < ln_c.size() ; i++)
+        {
+            delete ln_c[i];
+        }
+        
+        for(unsigned int i = 0; i < ln_i.size() ; i++)
+        {
+            delete ln_i[i];
+        }
+        
         for(unsigned int i = 0; i < ln.size() ; i++)
         {
             delete ln[i];
@@ -2080,6 +2095,9 @@ void Addition::addInf()
         }
         
         exp.clear();
+        ln_n1.clear();
+        ln_c.clear();
+        ln_i.clear();
         ln.clear();
         add.clear();
         
