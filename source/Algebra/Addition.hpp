@@ -42,10 +42,13 @@ public:
     //Composite
     vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
     vector<Addition*> ln_n1; //List: ln(-1) + ln(-1) + ...
-    vector<Addition*> ln_c; //List: ln(c1) + ln(c2) + ...
+    vector<Addition*> ln_c; //List: ln(1) + ln(2) + ln(2) + ...
     vector<Addition*> ln_i; //List: ln(i) + ln(i) + ...
     vector<Addition*> ln; //List of other: ln(x1) + ln(x2) + ...
     vector<Addition*> add; //List: x1 + x2
+    
+    bool isInteger;  //for integer conversion
+    int integer; //for integer conversion
     
     //Constructor
     Addition();
@@ -55,8 +58,8 @@ public:
     Addition(Addition* operand1, Addition* operand2); // addition
     ~Addition();
     
-    string getLatex();
-    void print();
+    string getLatex(bool isPrintInteger = false);
+    void print(bool isPrintInteger = false);
     
     Addition* getCopy();
     Addition* getTopmost();
@@ -72,11 +75,13 @@ public:
     bool haveOnlyInf();
     bool haveOnlyOneItem();
     
+    bool isSemiInterger();
+    
     void basicArithmetic();
     void cleanAddOld();
     
-    void cleanAdd();
-    void explnCancellation();
+    void cleanAdd(bool isPrintInteger = false);
+    void explnCancellation(bool isPrintInteger = false);
     
     bool lnInf();
     void ln0();

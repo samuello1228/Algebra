@@ -25,10 +25,39 @@ int main()
     
     //*
     //test integer
-    Addition* test1 = new Addition("1+1");
-    test1->print();
-    test1->simplification();
-    delete test1;
+    for(int i=1; i<=127; i++)
+    //for(int i=128; i<=128; i++)
+    {
+        Addition* test1 = new Addition(1,i);
+        cout<<"i = "<<i<<":"<<endl;
+        test1->print();
+        test1->simplification();
+        test1->print();
+        
+        if(test1->isSemiInterger())
+        {
+            if(test1->isInteger)
+            {
+                if(test1->integer != i)
+                {
+                    cout<<"Error: The value of integer is wrong."<<endl;
+                    break;
+                }
+            }
+            else
+            {
+                cout<<"Error: It not an interger."<<endl;
+                break;
+            }
+        }
+        else
+        {
+            cout<<"Error: It not a semi-interger."<<endl;
+            break;
+        }
+        delete test1;
+        cout<<endl;
+    }
     //*/
     
     /*

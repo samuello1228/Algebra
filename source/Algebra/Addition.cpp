@@ -378,7 +378,7 @@ Addition::Addition(string latex)
     }
     else if(trim.size() == 1 && trim[0] == '1')
     {
-        //For 0
+        //For 1
         mother = nullptr;
         motherType = 0;
         
@@ -397,7 +397,7 @@ Addition::Addition(string latex)
     }
     else if(trim.size() == 1 && trim[0] == '2')
     {
-        //For 0
+        //For 2
         mother = nullptr;
         motherType = 0;
         
@@ -628,25 +628,72 @@ Addition::Addition(int fundamentalType,unsigned int x)
         
         nZero = false;
         nNegative = false;
-        
-        if(x == 1)
-        {
-            nOne = true;
-            nTwo = false;
-        }
-        else if(x == 2)
-        {
-            nOne = false;
-            nTwo = true;
-        }
-        else
-        {
-            cout<<"Syntax Error: the integer need to be 1 or 2."<<endl;
-        }
-        
+        nOne = false;
+        nTwo = false;
         nTau = false;
         nComplex = false;
         nInfinity = false;
+        
+        depth = 1;
+        unsigned int index = 0;
+        unsigned int product = 1;
+        while(true)
+        {
+            //bitwise AND
+            unsigned int bit = x & product;
+            
+            if(bit > 0)
+            {
+                //cout<<"2^"<<index<<" = "<<bit<<endl;
+                
+                if(index == 0)
+                {
+                    nOne = true;
+                }
+                else if(index == 1)
+                {
+                    nTwo = true;
+                }
+                else
+                {
+                    //minimum depth = 5
+                    if (depth < 5) depth = 5;
+                    
+                    //2^n = exp(exp( ln(ln(2)) + ln(n) ))
+                    Addition* explnln2 = new Addition("\\exp(\\ln(\\ln(2)))");
+                    //explnln2->print();
+                    
+                    Addition* n = new Addition(1,index);
+                    explnln2->exp[0]->ln.push_back(n);
+                    n->mother = explnln2->exp[0];
+                    n->motherType = 2;
+                    
+                    //explnln2->print();
+                    //explnln2 = exp( ln(ln(2)) + ln(n) )
+                    
+                    exp.push_back(explnln2);
+                    explnln2->mother = this;
+                    explnln2->motherType = 1;
+                    
+                    if(n->depth +3 > depth) depth = n->depth +3;
+                }
+                
+                //x = x - bit, use bitwise XOR
+                x = x ^ bit;
+            }
+            
+            if(x==0) break;
+            else
+            {
+                //product *= 2
+                index++;
+                product = product << 1;
+            }
+        }
+        
+        //reverse order
+        reverse(exp.begin(),exp.end());
+        
         return;
     }
     if(fundamentalType == 2)
@@ -821,7 +868,7 @@ Addition::~Addition()
     }
 }
 
-string Addition::getLatex()
+string Addition::getLatex(bool isPrintInteger)
 {
     string output;
     
@@ -844,14 +891,6 @@ string Addition::getLatex()
     {
         output += " + 2";
     }
-    
-    /*
-    if(positveInterger != 0)
-    {
-        output += " + ";
-        output += std::to_string(positveInterger);
-    }
-    */
     
     if(nTau)
     {
@@ -890,41 +929,41 @@ string Addition::getLatex()
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
         output += " + \\\\exp(";
-        output += exp[i]->getLatex();
+        output += exp[i]->getLatex(isPrintInteger);
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
     {
         output += " + \\\\ln(";
-        output += ln_n1[i]->getLatex();
+        output += ln_n1[i]->getLatex(isPrintInteger);
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_c.size() ; i++)
     {
         output += " + \\\\ln(";
-        output += ln_c[i]->getLatex();
+        output += ln_c[i]->getLatex(isPrintInteger);
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
     {
         output += " + \\\\ln(";
-        output += ln_i[i]->getLatex();
+        output += ln_i[i]->getLatex(isPrintInteger);
         output += ")";
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
         output += " + \\\\ln(";
-        output += ln[i]->getLatex();
+        output += ln[i]->getLatex(isPrintInteger);
         output += ")";
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        string operand_latex = add[i]->getLatex();
+        string operand_latex = add[i]->getLatex(isPrintInteger);
         output += " + (";
         output += operand_latex;
         output += ")";
@@ -933,6 +972,12 @@ string Addition::getLatex()
     //erase " + "
     if(output.size() == 0)
     {
+        if(isPrintInteger && isInteger)
+        {
+            output = std::to_string(integer);
+            return output;
+        }
+        
         cout<<"Error: getLatex: the expression is empty"<<endl;
     }
     else output.erase(0,3);
@@ -944,9 +989,9 @@ string Addition::getLatex()
     return output;
 }
 
-void Addition::print()
+void Addition::print(bool isPrintInteger)
 {
-    cout<<getLatex()<<endl;
+    cout<<getLatex(isPrintInteger)<<endl;
     
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
@@ -1395,6 +1440,209 @@ bool Addition::haveOnlyOneItem()
     
     if(sum == 1) return true;
     else return false;
+}
+
+bool Addition::isSemiInterger()
+{
+    //check whether it can be converted to the form: c, ln(c), ln(ln(c))
+    for(unsigned int i = 0; i < exp.size() ; i++)
+    {
+        if(!exp[i]->isSemiInterger()) {isInteger = false; return false;}
+    }
+    
+    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    {
+        if(!ln_c[i]->isSemiInterger()) {isInteger = false; return false;}
+    }
+    
+    for(unsigned int i = 0; i < ln.size() ; i++)
+    {
+        if(!ln[i]->isSemiInterger()) {isInteger = false; return false;}
+    }
+    
+    explnCancellation(true);
+    cleanAdd(true);
+    
+    cout<<"start integer reduction:"<<endl;
+    print(true);
+    
+    if(nTau) {isInteger = false; return false;}
+    if(nComplex) {isInteger = false; return false;}
+    if(nInfinity) {isInteger = false; return false;}
+    if(exp.size() != 0) {isInteger = false; return false;}
+    if(ln_i.size() != 0) {isInteger = false; return false;}
+    
+    //classify ln to ln_c
+    int index = 0;
+    while(true)
+    {
+        if(index >= ln.size()) break;
+        
+        if(ln[index]->isInteger)
+        {
+            ln_c.push_back(ln[index]);
+            ln.erase(ln.begin()+index);
+        }
+        else index++;
+    }
+    
+    //Case 1: 1+2+4
+    //Case 2: ln(n)
+    //Case 3: ln(n) + ln(-1) = ln(-n)
+    //Case 4: ln(n_1) + ln(n_2) = ln(n_1*n_2)
+    //Case 5: ln(ln(2))
+    //Case 6: ln(ln(2)) + ln(n)  = ln(ln(2^n))
+    if(ln.size() == 0)
+    {
+        if(ln_c.size() == 0)
+        {
+            //Case 1: 1+2+4
+            if(ln_n1.size() != 0) {isInteger = false; return false;}
+            if(ln.size() != 0) {isInteger = false; return false;}
+            
+            integer = 0;
+            for(unsigned int i = 0; i < add.size() ; i++)
+            {
+                if(add[i]->isInteger)
+                {
+                    integer += add[i]->integer;
+                }
+                else {isInteger = false; return false;}
+            }
+            
+            if(nNegative) integer--;
+            if(nOne) integer += 1;
+            if(nTwo) integer += 2;
+            
+            //delete
+            for(unsigned int i = 0; i < add.size() ; i++)
+            {
+                delete add[i];
+            }
+            add.clear();
+            
+            nNegative = false;
+            nOne = false;
+            nTwo = false;
+            
+            isInteger = true;
+            cout<<"isSemiInterger: 1+2+4+..."<<endl;
+            getTopmost()->print(true);
+            return true;
+        }
+        else if(ln_c.size() == 1 || ln_c.size() == 2)
+        {
+            //Case 2: ln(n)
+            //Case 3: ln(n) + ln(-1) = ln(-n)
+            //Case 4: ln(n_1) + ln(n_2) = ln(n_1*n_2)
+            if(nNegative) {isInteger = false; return false;}
+            if(nOne) {isInteger = false; return false;}
+            if(nTwo) {isInteger = false; return false;}
+            if(add.size() != 0) {isInteger = false; return false;}
+            
+            if(ln_c.size() == 1)
+            {
+                //Case 2: ln(n)
+                //Case 3: ln(n) + ln(-1) = ln(-n)
+                if(ln_n1.size() == 0)
+                {
+                    //Case 2: ln(n)
+                    isInteger = false;
+                    cout<<"isSemiInterger: ln(n)"<<endl;
+                    getTopmost()->print(true);
+                    return true;
+                }
+                else if(ln_n1.size() == 1)
+                {
+                    //Case 3: ln(n) + ln(-1) = ln(-n)
+                    
+                    isInteger = false;
+                    cout<<"isSemiInterger: ln(n) + ln(-1) = ln(-n)"<<endl;
+                    getTopmost()->print(true);
+                    return true;
+                }
+                else {isInteger = false; return false;}
+            }
+            else if(ln_c.size() == 2)
+            {
+                //Case 4: ln(n_1) + ln(n_2) = ln(n_1*n_2)
+                if(ln_n1.size() != 0) {isInteger = false; return false;}
+                
+                //calculate ln(n_1) + ln(n_2) = ln(n_1*n_2)
+                ln_c[0]->integer *= ln_c[1]->integer;
+                
+                //delete
+                delete ln_c[1];
+                ln_c.erase(ln_c.begin()+1);
+                
+                isInteger = false;
+                cout<<"isSemiInterger: ln(n_1) + ln(n_2) = ln(n_1*n_2)"<<endl;
+                getTopmost()->print(true);
+                return true;
+            }
+            
+            return false;
+        }
+        else {isInteger = false; return false;}
+    }
+    else if(ln.size() == 1)
+    {
+        //Case 5: ln(ln(2))
+        //Case 6: ln(ln(2)) + ln(n)  = ln(ln(2^n))
+        
+        if(nNegative) {isInteger = false; return false;}
+        if(nOne) {isInteger = false; return false;}
+        if(nTwo) {isInteger = false; return false;}
+        if(ln_n1.size() != 0) {isInteger = false; return false;}
+        if(add.size() != 0) {isInteger = false; return false;}
+        
+        //search for ln(ln(2))
+        if(ln[0]->nNegative) {isInteger = false; return false;}
+        if(ln[0]->nOne) {isInteger = false; return false;}
+        if(ln[0]->nTwo) {isInteger = false; return false;}
+        if(ln[0]->nTau) {isInteger = false; return false;}
+        if(ln[0]->nComplex) {isInteger = false; return false;}
+        if(ln[0]->nInfinity) {isInteger = false; return false;}
+        if(ln[0]->exp.size() != 0) {isInteger = false; return false;}
+        if(ln[0]->ln_n1.size() != 0) {isInteger = false; return false;}
+        if(ln[0]->ln_i.size() != 0) {isInteger = false; return false;}
+        if(ln[0]->ln.size() != 0) {isInteger = false; return false;}
+        if(ln[0]->add.size() != 0) {isInteger = false; return false;}
+        
+        if(ln[0]->ln_c.size() != 1) {isInteger = false; return false;}
+        if(ln[0]->ln_c[0]->integer != 2) {isInteger = false; return false;}
+        
+        if(ln_c.size() == 0)
+        {
+            //Case 5: ln(ln(2))
+            
+            isInteger = false;
+            cout<<"isSemiInterger: ln(ln(2))"<<endl;
+            getTopmost()->print(true);
+            return true;
+        }
+        else if(ln_c.size() == 1)
+        {
+            //Case 6: ln(ln(2)) + ln(n)  = ln(ln(2^n))
+            
+            //search for ln(n)
+            if(ln_c[0]->integer <= 1) {isInteger = false; return false;}
+            
+            //calculate ln(ln(2^n))
+            ln[0]->ln_c[0]->integer = 1 << ln_c[0]->integer;
+            
+            //delete
+            delete ln_c[0];
+            ln_c.clear();
+            
+            isInteger = false;
+            cout<<"isSemiInterger: ln(ln(2)) + ln(n)"<<endl;
+            getTopmost()->print(true);
+            return true;
+        }
+        else {isInteger = false; return false;}
+    }
+    else {isInteger = false; return false;}
 }
 
 /*
@@ -1883,7 +2131,7 @@ void Addition::cleanAddOld()
 }
 */
 
-void Addition::cleanAdd()
+void Addition::cleanAdd(bool isPrintInteger)
 {
     bool isChanged = false;
     
@@ -1902,14 +2150,10 @@ void Addition::cleanAdd()
     if(isChanged)
     {
         eraseEmptyElement(add);
-        fillDepthOrder();
-        
-        sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
-            return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-        });
         
         cout<<"cleanAdd: exp"<<endl;
-        getTopmost()->print();
+        if(isPrintInteger) getTopmost()->print(true);
+        else getTopmost()->print();
     }
     isChanged = false;
     
@@ -1961,14 +2205,10 @@ void Addition::cleanAdd()
     if(isChanged)
     {
         eraseEmptyElement(add);
-        fillDepthOrder();
-        
-        sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
-        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-        });
         
         cout<<"cleanAdd: ln"<<endl;
-        getTopmost()->print();
+        if(isPrintInteger) getTopmost()->print(true);
+        else getTopmost()->print();
     }
     isChanged = false;
     
@@ -1993,19 +2233,15 @@ void Addition::cleanAdd()
     if(isChanged)
     {
         eraseEmptyElement(add);
-        fillDepthOrder();
-        
-        sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
-        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-        });
         
         cout<<"cleanAdd: add"<<endl;
-        getTopmost()->print();
+        if(isPrintInteger) getTopmost()->print(true);
+        else getTopmost()->print();
     }
     isChanged = false;
 }
 
-void Addition::explnCancellation()
+void Addition::explnCancellation(bool isPrintInteger)
 {
     //\exp(\ln(x_1)) + \exp(\ln(x_2)) + y = x_1 + x_2 + y
     bool isChanged = false;
@@ -2059,7 +2295,8 @@ void Addition::explnCancellation()
     {
         //not empty because add.push_back
         cout<<"explnCancellation: \\exp(\\ln(x)) = x"<<endl;
-        getTopmost()->print();
+        if(isPrintInteger) getTopmost()->print(true);
+        else getTopmost()->print();
     }
     isChanged = false;
     
@@ -2111,7 +2348,8 @@ void Addition::explnCancellation()
     {
         //not empty because add.push_back
         cout<<"explnCancellation: \\ln(\\exp(x)) = x"<<endl;
-        getTopmost()->print();
+        if(isPrintInteger) getTopmost()->print(true);
+        else getTopmost()->print();
     }
     isChanged = false;
     
