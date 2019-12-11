@@ -25,8 +25,8 @@ int main()
     
     //*
     //test integer
-    for(int i=1; i<=127; i++)
-    //for(int i=128; i<=128; i++)
+    for(int i=1; i<=1024; i++)
+    //for(int i=15; i<=15; i++)
     {
         Addition* test1 = new Addition(1,i);
         cout<<"i = "<<i<<":"<<endl;
