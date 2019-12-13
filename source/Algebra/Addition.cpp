@@ -931,6 +931,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + \\\\exp(";
         output += exp[i]->getLatex(isPrintInteger);
         output += ")";
+        
+        if(exp[i]->mother != this)
+        {
+            cout<<"Error: exp["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(exp[i]->motherType != 1)
+        {
+            cout<<"Error: exp["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
@@ -938,6 +947,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + \\\\ln(";
         output += ln_n1[i]->getLatex(isPrintInteger);
         output += ")";
+        
+        if(ln_n1[i]->mother != this)
+        {
+            cout<<"Error: ln_n1["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_n1[i]->motherType != 2)
+        {
+            cout<<"Error: ln_n1["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_c.size() ; i++)
@@ -945,6 +963,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + \\\\ln(";
         output += ln_c[i]->getLatex(isPrintInteger);
         output += ")";
+        
+        if(ln_c[i]->mother != this)
+        {
+            cout<<"Error: ln_c["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_c[i]->motherType != 2)
+        {
+            cout<<"Error: ln_c["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -952,6 +979,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + \\\\ln(";
         output += ln_i[i]->getLatex(isPrintInteger);
         output += ")";
+        
+        if(ln_i[i]->mother != this)
+        {
+            cout<<"Error: ln_i["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_i[i]->motherType != 2)
+        {
+            cout<<"Error: ln_i["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
@@ -959,6 +995,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + \\\\ln(";
         output += ln[i]->getLatex(isPrintInteger);
         output += ")";
+        
+        if(ln[i]->mother != this)
+        {
+            cout<<"Error: ln["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln[i]->motherType != 2)
+        {
+            cout<<"Error: ln["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
@@ -967,6 +1012,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + (";
         output += operand_latex;
         output += ")";
+        
+        if(add[i]->mother != this)
+        {
+            cout<<"Error: add["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(add[i]->motherType != 3)
+        {
+            cout<<"Error: add["<<i<<"]: the motherType is wrong"<<endl;
+        }
     }
     
     //erase " + "
@@ -992,78 +1046,6 @@ string Addition::getLatex(bool isPrintInteger)
 void Addition::print(bool isPrintInteger)
 {
     cout<<getLatex(isPrintInteger)<<endl;
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        if(exp[i]->mother != this)
-        {
-            cout<<"Error: exp["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(exp[i]->motherType != 1)
-        {
-            cout<<"Error: exp["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < ln_n1.size() ; i++)
-    {
-        if(ln_n1[i]->mother != this)
-        {
-            cout<<"Error: ln_n1["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(ln_n1[i]->motherType != 2)
-        {
-            cout<<"Error: ln_n1["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
-    {
-        if(ln_c[i]->mother != this)
-        {
-            cout<<"Error: ln_c["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(ln_c[i]->motherType != 2)
-        {
-            cout<<"Error: ln_c["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < ln_i.size() ; i++)
-    {
-        if(ln_i[i]->mother != this)
-        {
-            cout<<"Error: ln_i["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(ln_i[i]->motherType != 2)
-        {
-            cout<<"Error: ln_i["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        if(ln[i]->mother != this)
-        {
-            cout<<"Error: ln["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(ln[i]->motherType != 2)
-        {
-            cout<<"Error: ln["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        if(add[i]->mother != this)
-        {
-            cout<<"Error: add["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(add[i]->motherType != 3)
-        {
-            cout<<"Error: add["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
 }
 
 Addition* Addition::getCopy()
@@ -1537,8 +1519,8 @@ bool Addition::isSemiInterger()
         isInteger = true;
         if(isChanged && !haveOnly2)
         {
-            cout<<"isSemiInterger: 1+2+4+..."<<endl;
-            getTopmost()->print(true);
+            //cout<<"isSemiInterger: 1+2+4+..."<<endl;
+            //getTopmost()->print(true);
         }
         return true;
     }
@@ -1565,8 +1547,8 @@ bool Addition::isSemiInterger()
                 ln_c.erase(ln_c.begin()+index);
             }
             
-            cout<<"isSemiInterger: ln(n_1) + ln(n_2) = ln(n_1*n_2)"<<endl;
-            getTopmost()->print(true);
+            //cout<<"isSemiInterger: ln(n_1) + ln(n_2) = ln(n_1*n_2)"<<endl;
+            //getTopmost()->print(true);
         }
         
         if(ln.size() == 1)
@@ -1600,8 +1582,8 @@ bool Addition::isSemiInterger()
                 delete ln_c[0];
                 ln_c.clear();
                 
-                cout<<"isSemiInterger: ln(ln(2)) + ln(n) = ln(ln(2^n))"<<endl;
-                getTopmost()->print(true);
+                //cout<<"isSemiInterger: ln(ln(2)) + ln(n) = ln(ln(2^n))"<<endl;
+                //getTopmost()->print(true);
             }
         }
         
