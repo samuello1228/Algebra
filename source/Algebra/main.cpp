@@ -31,7 +31,6 @@ int main()
         Addition* test1 = new Addition(1,i);
         cout<<"i = "<<i<<":"<<endl;
         test1->print();
-        test1->simplification();
         
         cout<<"start to do integer reduction:"<<endl;
         test1->print();
@@ -140,8 +139,8 @@ int main()
     //test addCommonTerm
     //Addition* test = new Addition("0+0");
     
-    Addition* test_c = new Addition(1,8); test_c->print(); test_c->simplification();
-    Addition* test = new Addition("2+2+2+2"); test->print(); test->simplification();
+    Addition* test_c = new Addition(1,8); test_c->print();
+    Addition* test = new Addition("4+4"); test->print(); test->simplification();
     if(Addition::isSame(test,test_c)) cout<<"Same"<<endl;
     
     //Addition* test = new Addition("(-1)+(-1)+(-1)+(-1)");

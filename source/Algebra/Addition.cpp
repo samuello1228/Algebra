@@ -603,7 +603,6 @@ Addition::Addition(string latex)
         nInfinity = true;
         return;
     }
-    /*
     else if(trim[0] != '0' && std::isdigit(trim[0]))
     {
         //For positive integer
@@ -616,19 +615,27 @@ Addition::Addition(string latex)
             if(index+1 == trim.size())
             {
                 //For positive integer
+                Addition* c = new Addition(1, std::stoi(positive_integer));
+                
                 mother = nullptr;
                 motherType = 0;
                 
-                depth = 1;
+                depth = c->depth +1;
                 orderType = 1;
                 order = 0;
                 
                 nZero = false;
                 nNegative = false;
-                positveInterger = std::stoi(positive_integer);
+                nOne = false;
+                nTwo = false;
                 nTau = false;
                 nComplex = false;
                 nInfinity = false;
+                
+                add.push_back(c);
+                c->mother = this;
+                c->motherType = 3;
+                
                 return;
             }
             else if(std::isdigit(trim[index+1]))
@@ -641,7 +648,7 @@ Addition::Addition(string latex)
             }
         }
     }
-    */
+    
     {
         cout<<"Syntax Error: the expression cannot be processed: "<<trim<<endl;
         
@@ -743,6 +750,7 @@ Addition::Addition(int fundamentalType,unsigned int x)
         
         //reverse order
         reverse(exp.begin(),exp.end());
+        simplification();
         
         return;
     }
