@@ -65,6 +65,7 @@ public:
     Addition* getTopmost();
     void fillDepthOrder();
     void classifyln();
+    static bool isSame(Addition* x1,Addition* x2);
     
     bool isEmpty();
     bool haveOnlyZero();

@@ -23,7 +23,7 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
-    //*
+    /*
     //test integer
     for(int i=1; i<=1024; i++)
     //for(int i=15; i<=15; i++)
@@ -32,6 +32,8 @@ int main()
         cout<<"i = "<<i<<":"<<endl;
         test1->print();
         test1->simplification();
+        
+        cout<<"start to do integer reduction:"<<endl;
         test1->print();
         
         if(test1->isSemiInterger())
@@ -58,7 +60,7 @@ int main()
         delete test1;
         cout<<endl;
     }
-    //*/
+    */
     
     /*
     //test cleanAdd
@@ -134,20 +136,23 @@ int main()
     delete test;
     */
     
-    /*
+    //*
     //test addCommonTerm
-    //Addition* test = new Addition("0");
-    //Addition* test = new Addition("2");
-    //Addition* test = new Addition("-1");
+    //Addition* test = new Addition("0+0");
+    
+    Addition* test_c = new Addition(1,8); test_c->print(); test_c->simplification();
+    Addition* test = new Addition("2+2+2+2"); test->print(); test->simplification();
+    if(Addition::isSame(test,test_c)) cout<<"Same"<<endl;
+    
+    //Addition* test = new Addition("(-1)+(-1)+(-1)+(-1)");
     //Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2))");
     //Addition* test = new Addition("0+2+1 + (-1)");
-    Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2)) + \\exp(\\ln(-1) + \\ln(2)) + (-1) +3");
+    //Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2)) + \\exp(\\ln(-1) + \\ln(2)) + (-1) +3");
     //Addition* test = new Addition("x + \\exp(\\ln(2) + \\ln(x))");
     
-    test->print();
-    test->simplification();
     delete test;
-    */
+    delete test_c;
+    //*/
     
     //delete
     delete zero;

@@ -114,6 +114,56 @@ void updateDepthOrder(unsigned int& depth1, unsigned int& orderType1, int& order
     }
 }
 
+bool isSameList(vector<Addition*>& x1, vector<Addition*>& x2)
+{
+    if(x1.size() != x2.size()) return false;
+    std::vector<bool> isMatch(x1.size(), false);
+    
+    for(unsigned int i = 0; i < x1.size() ; i++)
+    {
+        bool isFoundMatch = false;
+        for(unsigned int j = 0; j < x2.size() ; j++)
+        {
+            if(!isMatch[j] && Addition::isSame(x1[i],x2[j]))
+            {
+                isMatch[j] = true;
+                isFoundMatch = true;
+                break;
+            }
+        }
+        
+        if(!isFoundMatch) return false;
+    }
+    
+    return true;
+}
+
+bool Addition::isSame(Addition* x1,Addition* x2)
+{
+    if(x1->nZero != x2->nZero) return false;
+    if(x1->nNegative != x2->nNegative) return false;
+    if(x1->nOne != x2->nOne) return false;
+    if(x1->nTwo != x2->nTwo) return false;
+    if(x1->nTau != x2->nTau) return false;
+    if(x1->nComplex != x2->nComplex) return false;
+    if(x1->nInfinity != x2->nInfinity) return false;
+    
+    if(x1->variable.size() != x2->variable.size()) return false;
+    for(unsigned int i = 0; i < x1->variable.size() ; i++)
+    {
+        if(x1->variable[i] != x2->variable[i]) return false;
+    }
+    
+    if(!isSameList(x1->exp,x2->exp)) return false;
+    if(!isSameList(x1->ln_n1,x2->ln_n1)) return false;
+    if(!isSameList(x1->ln_c,x2->ln_c)) return false;
+    if(!isSameList(x1->ln_i,x2->ln_i)) return false;
+    if(!isSameList(x1->ln,x2->ln)) return false;
+    if(!isSameList(x1->add,x2->add)) return false;
+    
+    return true;
+}
+
 Addition::Addition()
 {
     mother = nullptr;
@@ -593,7 +643,7 @@ Addition::Addition(string latex)
     }
     */
     {
-        cout<<"Syntax Error: the expression cannot be processed"<<endl;
+        cout<<"Syntax Error: the expression cannot be processed: "<<trim<<endl;
         
         mother = nullptr;
         motherType = 0;
@@ -1602,492 +1652,6 @@ bool Addition::isSemiInterger()
     else {isInteger = false; return false;}
 }
 
-/*
-void Addition::basicArithmetic()
-{
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->basicArithmetic();
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        ln[i]->basicArithmetic();
-    }
-    
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        add[i]->basicArithmetic();
-    }
-    
-    if(nInfinity)
-    {
-        nInfinity = false;
-        if(isEmpty())
-        {
-            nInfinity = true;
-            return;
-        }
-        
-        nZero = false;
-        nNegative = false;
-        positveInterger = 0;
-        nTau = false;
-        nComplex = false;
-        nInfinity = true;
-        
-        for(unsigned int i = 0; i < exp.size() ; i++)
-        {
-            delete exp[i];
-        }
-        
-        for(unsigned int i = 0; i < ln.size() ; i++)
-        {
-            delete ln[i];
-        }
-        
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            delete add[i];
-        }
-        
-        exp.clear();
-        ln.clear();
-        add.clear();
-        
-        cout<<"basicArithmetic: -inf + x = -inf"<<endl;
-        getTopmost()->print();
-        return;
-    }
-    
-    if(nZero)
-    {
-        nZero = false;
-        if(isEmpty())
-        {
-            nZero = true;
-            return;
-        }
-        else
-        {
-            cout<<"basicArithmetic: 0 + x = x"<<endl;
-            getTopmost()->print();
-        }
-    }
-    
-    if(nNegative && positveInterger >= 1)
-    {
-        //because it is not empty, nZero must be false
-        if(positveInterger == 1)
-        {
-            nNegative = false;
-            positveInterger = 0;
-            
-            if(isEmpty())
-            {
-                nZero = true;
-                cout<<"basicArithmetic: 1 + (-1) = 0"<<endl;
-                getTopmost()->print();
-                return;
-            }
-        }
-        else
-        {
-            nNegative = false;
-            positveInterger--;
-            
-            cout<<"basicArithmetic: x + (-1)"<<endl;
-            getTopmost()->print();
-            return;
-        }
-    }
-}
-*/
-
-/*
-void Addition::cleanAddOld()
-{
-    basicArithmetic();
-    
-    for(unsigned int i = 0; i < exp.size() ; i++)
-    {
-        exp[i]->cleanAddOld();
-    }
-    
-    for(unsigned int i = 0; i < ln.size() ; i++)
-    {
-        ln[i]->cleanAddOld();
-    }
-    
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        add[i]->cleanAddOld();
-    }
-    
-    //-inf
-    bool existInfinity = false;
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        if(add[i]->nInfinity) existInfinity = true;
-    }
-    
-    //erase all elements in add
-    if(existInfinity)
-    {
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            delete add[i];
-        }
-        add.clear();
-        
-        nInfinity = true;
-        
-        cout<<"cleanAdd: -inf"<<endl;
-        getTopmost()->print();
-        return;
-    }
-    
-    //zero
-    bool isChanged = false;
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        if(add[i]->nZero)
-        {
-            //Because basicArithmetic is done, add[i] must be empty
-            add[i]->nZero = false;
-            isChanged = true;
-        }
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        if(isEmpty())
-        {
-            nZero = true;
-            cout<<"cleanAdd: zero"<<endl;
-            getTopmost()->print();
-            return;
-        }
-        else
-        {
-            cout<<"cleanAdd: zero"<<endl;
-            getTopmost()->print();
-        }
-    }
-    isChanged = false;
-    
-    //integer
-    {
-        //positveInterger
-        int sum = positveInterger;
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            if(add[i]->positveInterger != 0)
-            {
-                sum += add[i]->positveInterger;
-                add[i]->positveInterger = 0;
-                isChanged = true;
-            }
-        }
-        
-        //negative
-        if(nNegative) sum--;
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            if(add[i]->nNegative)
-            {
-                sum--;
-                add[i]->nNegative = false;
-                isChanged = true;
-            }
-        }
-        
-        if(isChanged)
-        {
-            if(sum>=0)
-            {
-                nNegative = false;
-                positveInterger = sum;
-            }
-            else if(sum == -1)
-            {
-                nNegative = true;
-                positveInterger = 0;
-            }
-            else
-            {
-                nNegative = false;
-                positveInterger = 0;
-                
-                Addition* c = new Addition(1,-sum);
-                Addition* ln_c = new Addition(2,c);
-                Addition* n1 = new Addition("-1");
-                
-                ln_c->ln.push_back(n1);
-                n1->mother = ln_c;
-                n1->motherType = 2;
-                
-                exp.push_back(ln_c);
-            }
-        }
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        if(isEmpty())
-        {
-            nZero = true;
-            cout<<"cleanAdd: interger"<<endl;
-            getTopmost()->print();
-            return;
-        }
-        else
-        {
-            cout<<"cleanAdd: interger"<<endl;
-            getTopmost()->print();
-        }
-    }
-    isChanged = false;
-    
-    //tau
-    {
-        unsigned int sum = 0;
-        if(nTau) sum++;
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            if(add[i]->nTau)
-            {
-                sum++;
-                add[i]->nTau = false;
-                isChanged = true;
-            }
-        }
-        
-        if(isChanged)
-        {
-            if(sum == 1)
-            {
-                nTau = true;
-            }
-            else
-            {
-                nTau = false;
-                
-                Addition* c = new Addition(1,sum);
-                Addition* ln_c = new Addition(2,c);
-                Addition* tau = new Addition("\\tau");
-                
-                ln_c->ln.push_back(tau);
-                tau->mother = ln_c;
-                tau->motherType = 2;
-                
-                exp.push_back(ln_c);
-            }
-        }
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        cout<<"cleanAdd: tau"<<endl;
-        getTopmost()->print();
-    }
-    isChanged = false;
-    
-    //i
-    {
-        unsigned int sum = 0;
-        if(nComplex) sum++;
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            if(add[i]->nComplex)
-            {
-                sum++;
-                add[i]->nComplex = false;
-                isChanged = true;
-            }
-        }
-        
-        if(isChanged)
-        {
-            if(sum == 1)
-            {
-                nComplex = true;
-            }
-            else
-            {
-                nComplex = false;
-                
-                Addition* c = new Addition(1,sum);
-                Addition* ln_c = new Addition(2,c);
-                Addition* i = new Addition("i");
-                
-                ln_c->ln.push_back(i);
-                i->mother = ln_c;
-                i->motherType = 2;
-                
-                exp.push_back(ln_c);
-            }
-        }
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        cout<<"cleanAdd: i"<<endl;
-        getTopmost()->print();
-    }
-    isChanged = false;
-    
-    //Variable
-    {
-        vector<unsigned int> sum;
-        sum.resize(variable.size(),0);
-        for(unsigned int i = 0; i < variable.size() ; i++)
-        {
-            if(variable[i]) sum[i]++;
-        }
-        
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            for(unsigned int j = 0; j < add[i]->variable.size() ; j++)
-            {
-                if(add[i]->variable[j])
-                {
-                    if(j >= sum.size())
-                    {
-                        //expand vector sum
-                        unsigned long original_size = sum.size();
-                        for(unsigned int k = 0; k < j-original_size ; k++)
-                        {
-                            sum.push_back(0);
-                        }
-                        sum.push_back(1);
-                    }
-                    else
-                    {
-                        sum[j]++;
-                    }
-                    
-                    isChanged = true;
-                }
-            }
-            
-            add[i]->variable.clear();
-        }
-        
-        if(isChanged)
-        {
-            for(unsigned int i = 0; i < sum.size() ; i++)
-            {
-                if(sum[i] == 0) {}
-                else if(sum[i] == 1)
-                {
-                    if(i >= variable.size())
-                    {
-                        //expand vector sum
-                        unsigned long original_size = variable.size();
-                        for(int k = 0; k < i-original_size ; k++)
-                        {
-                            variable.push_back(false);
-                        }
-                        variable.push_back(true);
-                    }
-                    else
-                    {
-                        variable[i] = true;
-                    }
-                }
-                else
-                {
-                    if(i < variable.size())
-                    {
-                        variable[i] = false;
-                    }
-                    
-                    Addition* c = new Addition(1,sum[i]);
-                    Addition* ln_c = new Addition(2,c);
-                    Addition* x = new Addition(2,i);
-                    
-                    ln_c->ln.push_back(x);
-                    x->mother = ln_c;
-                    x->motherType = 2;
-                    
-                    exp.push_back(ln_c);
-                }
-            }
-        }
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        cout<<"cleanAdd: variable"<<endl;
-        getTopmost()->print();
-    }
-    isChanged = false;
-    
-    //exp
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        for(unsigned int j = 0; j < add[i]->exp.size() ; j++)
-        {
-            exp.push_back(add[i]->exp[j]);
-            add[i]->exp[j]->mother = this;
-            isChanged = true;
-        }
-        add[i]->exp.clear();
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        fillDepthOrder();
-        
-        sort(exp.begin(), exp.end(), [](Addition* a, Addition* b)->bool{
-            return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-        });
-        
-        cout<<"cleanAdd: exp"<<endl;
-        getTopmost()->print();
-    }
-    isChanged = false;
-    
-    //ln
-    for(unsigned int i = 0; i < add.size() ; i++)
-    {
-        for(unsigned int j = 0; j < add[i]->ln.size() ; j++)
-        {
-            ln.push_back(add[i]->ln[j]);
-            add[i]->ln[j]->mother = this;
-            isChanged = true;
-        }
-        add[i]->ln.clear();
-    }
-    
-    if(isChanged)
-    {
-        eraseEmptyElement(add);
-        fillDepthOrder();
-        
-        sort(ln.begin(), ln.end(), [](Addition* a, Addition* b)->bool{
-        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-        });
-        
-        cout<<"cleanAdd: ln"<<endl;
-        getTopmost()->print();
-    }
-    isChanged = false;
-    
-    if(add.size() != 0)
-    {
-        cout<<"Error: cannot clean add"<<endl;
-    }
-}
-*/
-
 void Addition::cleanAdd(bool isPrintInteger)
 {
     bool isChanged = false;
@@ -2734,10 +2298,13 @@ void Addition::expand()
 
 void Addition::addCommonTerm()
 {
-    //----------------------
-    //c >= 2
-    //Type 1a: x = positiveInteger, (-1)
-    //x_1 + x_2 + ... = \exp(\ln(-1) + \ln(c))
+    //Type 1a:
+    //0 + x = x
+    //1 + 1 = 2
+    //2 + 2 = \exp(\exp(\ln(2) + \ln(\ln(2))))
+    //(-1) + (-1) = \exp(\ln(2) + \ln(-1))
+    //1 + (-1) = 0
+    //2 + (-1) = 1
     
     //Type 1b: x = tau, i, x, y, z, ln(x)
     //x + x = \exp(\ln(2) + \ln(x))
@@ -2747,8 +2314,8 @@ void Addition::addCommonTerm()
     //x + \exp(          \ln(c) + \ln(x)) = \exp(          \ln(c+1) + \ln(x))
     //x + \exp(\ln(-1) + \ln(c) + \ln(x)) = \exp(\ln(-1) + \ln(c-1) + \ln(x))
     
-    //Type 2: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
-    //\exp(                     x) + \exp(                   + x) = \exp(          \ln(2)       + x)
+    //Type 2: x = 1 + 2 + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
+    //\exp(                     x) + \exp(                     x) = \exp(          \ln(2)       + x)
     //\exp(                     x) + \exp(\ln(-1)            + x) = 0
     //\exp(                     x) + \exp(          \ln(c)   + x) = \exp(          \ln(c+1)     + x)
     //\exp(                     x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c-1)     + x)
@@ -2763,152 +2330,159 @@ void Addition::addCommonTerm()
     
     //\exp(\ln(-1) + \ln(c_1) + x) + \exp(\ln(-1) + \ln(c_2) + x) = \exp(\ln(-1) + \ln(c_1+c_2) + x)
     
-    //For Type 1a
     {
-        /*
-        int sum = 0; //the sum of all integer
-        int nItem = 0; //number of integer
-        int nCase = 0; //number of irreducible case, except the result is 0
-        int firstNegativeIndex = -1; //keep only one exp[i] for negative result, delete others
-        
-        //fill sum, nItem, nCase, firstNegativeIndex, remove other exp[i], remove all integer in add
-        if(nZero) nItem++;
-        if(haveOnlyZero()) nCase++;
-        
-        if(nNegative)
-        {
-            nItem++;
-            nCase++;
-            sum += -1;
-        }
-        if(positveInterger != 0)
-        {
-            nItem++;
-            nCase++;
-            sum += positveInterger;
-        }
-        
-        //For exp
-        int index = 0;
-        while(true)
-        {
-            if(index >= exp.size()) break;
-            
-            if(!exp[index]->nZero &&
-               !exp[index]->nNegative &&
-               exp[index]->positveInterger == 0 &&
-               !exp[index]->nTau &&
-               !exp[index]->nComplex &&
-               exp[index]->variable.size() == 0 &&
-               exp[index]->exp.size() == 0 &&
-               exp[index]->ln_n1.size() == 1 &&
-               exp[index]->ln_c.size() == 1 &&
-               exp[index]->ln_i.size() == 0 &&
-               exp[index]->ln.size() == 0 &&
-               exp[index]->add.size() == 0 )
-            {
-                nItem++;
-                nCase++;
-                sum -= exp[index]->ln_c[0]->positveInterger;
-                
-                //keep only one exp[i] for negative result, delete others
-                if(firstNegativeIndex == -1)
-                {
-                    firstNegativeIndex = index;
-                    index++;
-                }
-                else
-                {
-                    delete exp[index];
-                    exp.erase(exp.begin()+index);
-                }
-            }
-            else index++;
-        }
-        
-        //For add
+        //For zero
+        bool isChanged = false;
         for(unsigned int i = 0; i < add.size() ; i++)
         {
             if(add[i]->nZero)
             {
-                nItem++;
                 add[i]->nZero = false;
-            }
-            if(add[i]->nNegative)
-            {
-                nItem++;
-                sum += -1;
-                add[i]->nNegative = false;
-            }
-            if(add[i]->positveInterger !=0)
-            {
-                nItem++;
-                sum += add[i]->positveInterger;
-                add[i]->positveInterger = 0;
+                isChanged = true;
             }
         }
         
-        if(nItem == 0 && !isEmpty()) nCase++;
-        
-        //modify to make the result
-        if(nCase != 1)
+        if(isChanged)
         {
-            if(sum == -1) nNegative = true;
-            else nNegative = false;
-            
-            if(sum >= 1) positveInterger = sum;
-            else positveInterger = 0;
-            
-            //For exp
-            if(sum <= -2)
+            eraseEmptyElement(add);
+            if(isEmpty()) nZero = true;
+        }
+        
+        if(nZero && !haveOnlyZero())
+        {
+            nZero = false;
+            isChanged = true;
+        }
+        
+        if(isChanged)
+        {
+            cout<<"addCommonTerm: 0 + x = x"<<endl;
+            getTopmost()->print();
+        }
+        isChanged = false;
+        
+        //For 1
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nOne)
             {
-                if(firstNegativeIndex >= 0)
+                add[i]->nOne = false;
+                
+                if(nOne)
                 {
-                    exp[firstNegativeIndex]->ln_c[0]->positveInterger = -sum;
+                    nOne = false;
+                    
+                    Addition* two = new Addition("2");
+                    add.push_back(two);
+                    two->mother = this;
+                    two->motherType = 3;
                 }
                 else
                 {
-                    Addition* c = new Addition(1,-sum);
-                    Addition* ln_c = new Addition(2,c);
-                    Addition* n1 = new Addition("-1");
-                    
-                    ln_c->ln_n1.push_back(n1);
-                    n1->mother = ln_c;
-                    n1->motherType = 2;
-                    
-                    exp.push_back(ln_c);
-                    ln_c->mother = this;
-                    ln_c->motherType = 1;
+                    nOne = true;
                 }
+                isChanged = true;
             }
-            else
-            {
-                if(firstNegativeIndex >= 0)
-                {
-                    delete exp[firstNegativeIndex];
-                    exp.erase(exp.begin()+firstNegativeIndex);
-                }
-            }
-            
-            //For add
+        }
+        
+        if(isChanged)
+        {
             eraseEmptyElement(add);
-            
-            //For nZero, after eraseEmptyElement
             if(isEmpty()) nZero = true;
-            else nZero = false;
-            
-            cout<<"addCommonTerm: interger"<<endl;
+        }
+        
+        if(isChanged)
+        {
+            cout<<"addCommonTerm: one"<<endl;
             getTopmost()->print();
         }
-        */
+        isChanged = false;
         
-        bool isChanged = true;
-        while(isChanged)
+        //For 2
+        for(unsigned int i = 0; i < add.size() ; i++)
         {
-            isChanged = false;
-            
-            
+            if(add[i]->nTwo)
+            {
+                add[i]->nTwo = false;
+                
+                if(nTwo)
+                {
+                    nTwo = false;
+                    
+                    Addition* four = new Addition("\\exp(\\ln(\\ln(2)))");
+                    
+                    Addition* two = new Addition("2");
+                    four->exp[0]->ln_c.push_back(two);
+                    two->mother = four->exp[0];
+                    two->motherType = 2;
+                    
+                    exp.push_back(four);
+                    four->mother = this;
+                    four->motherType = 1;
+                }
+                else
+                {
+                    nTwo = true;
+                }
+                isChanged = true;
+            }
         }
+        
+        if(isChanged)
+        {
+            eraseEmptyElement(add);
+            if(isEmpty()) nZero = true;
+        }
+        
+        if(isChanged)
+        {
+            cout<<"addCommonTerm: two"<<endl;
+            getTopmost()->print();
+        }
+        isChanged = false;
+        
+        //For -1
+        for(unsigned int i = 0; i < add.size() ; i++)
+        {
+            if(add[i]->nNegative)
+            {
+                add[i]->nNegative = false;
+                
+                if(nNegative)
+                {
+                    nNegative = false;
+                    
+                    Addition* ln2 = new Addition("\\ln(2)");
+                    Addition* n1 = new Addition("-1");
+                    
+                    ln2->ln_n1.push_back(n1);
+                    n1->mother = ln2;
+                    n1->motherType = 2;
+                    
+                    exp.push_back(ln2);
+                    ln2->mother = this;
+                    ln2->motherType = 1;
+                }
+                else
+                {
+                    nNegative = true;
+                }
+                isChanged = true;
+            }
+        }
+        
+        if(isChanged)
+        {
+            eraseEmptyElement(add);
+            if(isEmpty()) nZero = true;
+        }
+        
+        if(isChanged)
+        {
+            cout<<"addCommonTerm: -1"<<endl;
+            getTopmost()->print();
+        }
+        isChanged = false;
     }
     
     //For Type 1b
@@ -2916,6 +2490,43 @@ void Addition::addCommonTerm()
     //For Type 1c
     
     //For Type 2
+    //exp(x) + exp(x) = exp(ln(2) + x)
+    while(true)
+    {
+        bool isFound = false;
+        for(unsigned int i = 0; i < exp.size() ; i++)
+        {
+            for(unsigned int j = i+1; j < exp.size() ; j++)
+            {
+                if(isSame(exp[i],exp[j]))
+                {
+                    isFound = true;
+                    
+                    //delete exp[j]
+                    delete exp[j];
+                    exp.erase(exp.begin()+j);
+                    
+                    //modift exp[i]
+                    Addition* two = new Addition("2");
+                    
+                    exp[i]->ln_c.push_back(two);
+                    two->mother = exp[i];
+                    two->motherType = 2;
+                    
+                    cout<<"addCommonTerm: exp(x) + exp(x) = exp(ln(2) + x)"<<endl;
+                    getTopmost()->print();
+                    
+                    exp[i]->addCommonTerm();
+                    
+                    break;
+                }
+            }
+            
+            if(isFound) break;
+        }
+        
+        if(!isFound) break;
+    }
 }
 
 void Addition::simplification()
@@ -2999,7 +2610,6 @@ void Addition::simplification()
     //EXP[ ln(i) + ln(i) + x ] = //EXP[ ln(-1) + x ]
     //EXP[ ln(-1) + ln(-1) + x ] = //EXP[ ln(1) + x ]
     //EXP[ ln(1) + x ] = EXP[ x ]
-    //EXP[ ln(c_1) + ln(c_2) + x ] = //EXP[ ln(c_1*c_2) + x ]
     //need classifyln
     classifyln();
     ln_1nic();
@@ -3029,6 +2639,9 @@ void Addition::simplification()
     //exp(x + ln(y + z)) = exp(x + ln(y)) + exp(x + ln(z))
     //need ln_1nic before expand, to ensure ln_n1.size() <= 1, etc
     expand();
+    explnCancellation();
+    cleanAdd();
+    exp0();
     
     //----------------------
     //c >= 2
@@ -3044,7 +2657,7 @@ void Addition::simplification()
     //x + \exp(\ln(-1) + \ln(c) + \ln(x)) = \exp(\ln(-1) + \ln(c-1) + \ln(x))
     
     //Type 3: x = positiveInteger + (-1) + tau + i + x + y + z + exp(x) + exp(y) + ... + ln(x) + ln(y) + ...
-    //\exp(                     x) + \exp(                   + x) = \exp(          \ln(2)       + x)
+    //\exp(                     x) + \exp(                     x) = \exp(          \ln(2)       + x)
     //\exp(                     x) + \exp(\ln(-1)            + x) = 0
     //\exp(                     x) + \exp(          \ln(c)   + x) = \exp(          \ln(c+1)     + x)
     //\exp(                     x) + \exp(\ln(-1) + \ln(c)   + x) = \exp(\ln(-1) + \ln(c-1)     + x)
