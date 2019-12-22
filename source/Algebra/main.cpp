@@ -62,6 +62,95 @@ int main()
     */
     
     /*
+    {
+        int max = 1024;
+        int count = 1;
+        Addition* x = new Addition("1");
+        while(true)
+        {
+            x->simplification();
+            Addition* y = new Addition(1,count);
+            if(!Addition::isSame(x,y))
+            {
+                cout<<"Error: Different integer: "<<count<<endl;
+                x->print();
+                y->print();
+                
+                delete x;
+                delete y;
+                break;
+            }
+            
+            delete y;
+            if(count == max)
+            {
+                delete x;
+                break;
+            }
+            else
+            {
+                Addition* one = new Addition("1");
+                x->add.push_back(one);
+                one->mother = x;
+                one->motherType = 3;
+                
+                count++;
+            }
+        }
+    }
+    */
+    
+    //*
+    {
+        int max = 1<<30;
+        int count = 1;
+        Addition* x = new Addition("1");
+        while(true)
+        {
+            cout<<"x: count: "<<count<<endl;
+            x->simplification();
+            cout<<"y: count: "<<count<<endl;
+            Addition* y = new Addition(1,count);
+            if(!Addition::isSame(x,y))
+            {
+                cout<<"Error: Different integer: "<<count<<endl;
+                x->print();
+                y->print();
+                
+                delete x;
+                delete y;
+                break;
+            }
+            else
+            {
+                cout<<"Smae integer: "<<count<<endl;
+                x->print();
+                y->print();
+            }
+            
+            delete y;
+            if(count == max)
+            {
+                delete x;
+                break;
+            }
+            else
+            {
+                Addition* lnx = new Addition(2,x);
+                Addition* expln2 = new Addition("\\exp(\\ln(2))");
+                expln2->exp[0]->add.push_back(lnx);
+                lnx->mother = expln2->exp[0];
+                lnx->motherType = 3;
+                
+                x = expln2;
+                
+                count *= 2;
+            }
+        }
+    }
+    //*/
+    
+    /*
     //test cleanAdd
     Addition* test1 = new Addition("1"); Addition* test2 = new Addition("((-1) + (-1)) + ((-1) + (0))");
     //Addition* test1 = new Addition("\\tau"); Addition* test2 = new Addition("((\\tau) + (\\tau)) + ((\\tau) + (0))");
@@ -135,23 +224,21 @@ int main()
     delete test;
     */
     
-    //*
+    /*
     //test addCommonTerm
     //Addition* test = new Addition("0+0");
-    
-    Addition* test_c = new Addition(1,8); test_c->print();
-    Addition* test = new Addition("4+4"); test->print(); test->simplification();
-    if(Addition::isSame(test,test_c)) cout<<"Same"<<endl;
-    
+    //Addition* test = new Addition("\\ln(2) + \\ln(2)");
+    Addition* test = new Addition("\\exp(\\exp(\\ln(2) + \\ln(\\ln(2))) + \\ln(2) + \\ln(2))");
     //Addition* test = new Addition("(-1)+(-1)+(-1)+(-1)");
     //Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2))");
     //Addition* test = new Addition("0+2+1 + (-1)");
     //Addition* test = new Addition("\\exp(\\ln(-1) + \\ln(2)) + \\exp(\\ln(-1) + \\ln(2)) + (-1) +3");
     //Addition* test = new Addition("x + \\exp(\\ln(2) + \\ln(x))");
     
+    test->print();
+    test->simplification();
     delete test;
-    delete test_c;
-    //*/
+    */
     
     //delete
     delete zero;

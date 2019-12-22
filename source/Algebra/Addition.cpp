@@ -2494,6 +2494,52 @@ void Addition::addCommonTerm()
     }
     
     //For Type 1b
+    //ln(x) + ln(x) = exp(ln(2) + ln(ln(x)))
+    while(true)
+    {
+        bool isFound = false;
+        for(unsigned int i = 0; i < ln_c.size() ; i++)
+        {
+            for(unsigned int j = i+1; j < ln_c.size() ; j++)
+            {
+                if(isSame(ln_c[i],ln_c[j]))
+                {
+                    isFound = true;
+                    
+                    //delete ln_c[j]
+                    delete ln_c[j];
+                    ln_c.erase(ln_c.begin()+j);
+                    
+                    //create ln(2)
+                    Addition* ln2 = new Addition("\\ln(2)");
+                    
+                    //move ln_c[i]
+                    Addition* lnx = new Addition(2,ln_c[i]);
+                    //erase ln_c[i]
+                    ln_c.erase(ln_c.begin()+i);
+                    
+                    //create ln(2) + ln(ln(x))
+                    ln2->ln.push_back(lnx);
+                    lnx->mother = ln2;
+                    lnx->motherType = 2;
+                    
+                    //create exp(ln(2) + ln(ln(x)))
+                    exp.push_back(ln2);
+                    ln2->mother = this;
+                    ln2->motherType = 1;
+                    
+                    cout<<"addCommonTerm: ln(x) + ln(x) = exp(ln(2) + ln(ln(x)))"<<endl;
+                    getTopmost()->print();
+                    
+                    break;
+                }
+            }
+            
+            if(isFound) break;
+        }
+        
+        if(!isFound) break;
+    }
     
     //For Type 1c
     
