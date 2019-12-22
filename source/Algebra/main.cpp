@@ -102,25 +102,26 @@ int main()
     
     //*
     {
-        int max = 30;
-        int count = 1;
-        int product = 2;
-        Addition* x = new Addition("2");
+        int max = 1000;
+        int index = 2;
+        int product = 4;
+        Addition* lnx = Addition::lnPowerOf2(index);
+        Addition* x = new Addition(1,lnx);
         while(true)
         {
-            cout<<"x: count: "<<product<<endl;
+            cout<<"x: 2^"<<index<<endl;
             x->simplification();
-            cout<<"y: count: "<<product<<endl;
+            cout<<"y: 2^"<<index<<endl;
             //Addition* y = new Addition(1,product);
             
-            Addition* lny = Addition::lnPowerOf2(count);
+            Addition* lny = Addition::lnPowerOf2(index);
             Addition* y = new Addition(1,lny);
-            y->explnCancellation();
-            y->addCommonTerm();
+            //y->explnCancellation();
+            //y->addCommonTerm();
             
             if(!Addition::isSame(x,y))
             {
-                cout<<"Error: Different integer: "<<product<<endl;
+                cout<<"Error: Different integer: 2^"<<index<<endl;
                 x->print();
                 y->print();
                 
@@ -130,13 +131,13 @@ int main()
             }
             else
             {
-                cout<<"Smae integer: "<<product<<endl;
+                cout<<"Smae integer: 2^"<<index<<endl;
                 x->print();
                 y->print();
             }
             
             delete y;
-            if(count == max)
+            if(index == max)
             {
                 delete x;
                 break;
@@ -153,7 +154,7 @@ int main()
                 two->motherType = 2;
                 
                 x = explnx;
-                count++;
+                index++;
                 product *= 2;
             }
         }
