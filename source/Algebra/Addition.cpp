@@ -671,6 +671,100 @@ Addition::Addition(string latex)
     }
 }
 
+Addition* Addition::lnPowerOf2(unsigned int x)
+{
+    //y = ln(2^x)
+    
+    //  ln(2^7)
+    //= ln( 2^(2^0 + 2^1 + 2^2) )
+    //= ln( 2^(2^0) * 2^(2^1) * 2^(2^2) )
+    //= ln(2^(2^0)) + ln(2^(2^1)) + ln(2^(2^2))
+    //= ln(2) + exp(ln(ln(2)) + ln(2^1)) + exp(ln(ln(2)) + ln(2^2))
+    
+    Addition* y = new Addition();
+    
+    y->mother = nullptr;
+    y->motherType = 0;
+    
+    y->orderType = 1;
+    y->order = 0;
+    
+    y->nZero = false;
+    y->nNegative = false;
+    y->nOne = false;
+    y->nTwo = false;
+    y->nTau = false;
+    y->nComplex = false;
+    y->nInfinity = false;
+    
+    unsigned int index = 0;
+    unsigned int product = 1;
+    while(true)
+    {
+        //bitwise AND
+        unsigned int bit = x & product;
+        
+        if(bit > 0)
+        {
+            //cout<<"2^"<<index<<" = "<<bit<<endl;
+            
+            if(index == 0)
+            {
+                //y += ln(2)
+                y->depth = 2;
+                
+                Addition* two = new Addition("2");
+                y->ln_c.push_back(two);
+                two->mother = y;
+                two->motherType = 2;
+            }
+            else
+            {
+                //y += exp(ln(ln(2)) + ln(2^index))
+                
+                //minimum depth = 4
+                y->depth = 4;
+                
+                //ln(n) = ln(2^index)
+                Addition* lnn = Addition::lnPowerOf2(index);
+                
+                //ln(2)
+                Addition* ln2 = new Addition("\\ln(2)");
+                
+                //ln(ln(2)) + ln(2^index)
+                lnn->ln.push_back(ln2);
+                ln2->mother = lnn;
+                ln2->motherType = 2;
+                
+                //lnn = ln(ln(2)) + ln(2^index)
+                //lnn->print();
+                
+                y->exp.push_back(lnn);
+                lnn->mother = y;
+                lnn->motherType = 1;
+                
+                if(lnn->depth +1 > y->depth) y->depth = lnn->depth +1;
+            }
+            
+            //x = x - bit, use bitwise XOR
+            x = x ^ bit;
+        }
+        
+        if(x==0) break;
+        else
+        {
+            //product *= 2
+            index++;
+            product = product << 1;
+        }
+    }
+    
+    //reverse order
+    reverse(y->exp.begin(),y->exp.end());
+    
+    return y;
+}
+
 Addition::Addition(int fundamentalType,unsigned int x)
 {
     if(fundamentalType == 1)

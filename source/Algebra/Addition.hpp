@@ -53,6 +53,7 @@ public:
     //Constructor
     Addition();
     Addition(string latex);
+    static Addition* lnPowerOf2(unsigned int x); //return ln(2^x)
     Addition(int fundamentalType, unsigned int x); //fundamentalType: 1 = positveInterger, 2 = the nth variable
     Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln, 3 = add
     Addition(Addition* operand1, Addition* operand2); // addition

@@ -102,18 +102,25 @@ int main()
     
     //*
     {
-        int max = 1<<30;
+        int max = 30;
         int count = 1;
-        Addition* x = new Addition("1");
+        int product = 2;
+        Addition* x = new Addition("2");
         while(true)
         {
-            cout<<"x: count: "<<count<<endl;
+            cout<<"x: count: "<<product<<endl;
             x->simplification();
-            cout<<"y: count: "<<count<<endl;
-            Addition* y = new Addition(1,count);
+            cout<<"y: count: "<<product<<endl;
+            //Addition* y = new Addition(1,product);
+            
+            Addition* lny = Addition::lnPowerOf2(count);
+            Addition* y = new Addition(1,lny);
+            y->explnCancellation();
+            y->addCommonTerm();
+            
             if(!Addition::isSame(x,y))
             {
-                cout<<"Error: Different integer: "<<count<<endl;
+                cout<<"Error: Different integer: "<<product<<endl;
                 x->print();
                 y->print();
                 
@@ -123,7 +130,7 @@ int main()
             }
             else
             {
-                cout<<"Smae integer: "<<count<<endl;
+                cout<<"Smae integer: "<<product<<endl;
                 x->print();
                 y->print();
             }
@@ -136,15 +143,18 @@ int main()
             }
             else
             {
+                //exp(ln(2)+ln(x))
                 Addition* lnx = new Addition(2,x);
-                Addition* expln2 = new Addition("\\exp(\\ln(2))");
-                expln2->exp[0]->add.push_back(lnx);
-                lnx->mother = expln2->exp[0];
-                lnx->motherType = 3;
+                Addition* explnx = new Addition(1,lnx);
                 
-                x = expln2;
+                Addition* two = new Addition("2");
+                explnx->exp[0]->ln_c.push_back(two);
+                two->mother = explnx->exp[0];
+                two->motherType = 2;
                 
-                count *= 2;
+                x = explnx;
+                count++;
+                product *= 2;
             }
         }
     }
