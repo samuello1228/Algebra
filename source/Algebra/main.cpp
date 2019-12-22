@@ -61,14 +61,16 @@ int main()
     }
     */
     
-    /*
+    //*
     {
-        int max = 1024;
+        int max = 5000;
         int count = 1;
         Addition* x = new Addition("1");
         while(true)
         {
+            cout<<"x: "<<count<<endl;
             x->simplification();
+            cout<<"y: "<<count<<endl;
             Addition* y = new Addition(1,count);
             if(!Addition::isSame(x,y))
             {
@@ -79,6 +81,12 @@ int main()
                 delete x;
                 delete y;
                 break;
+            }
+            else
+            {
+                //cout<<"Smae integer: "<<count<<endl;
+                //x->print();
+                //y->print();
             }
             
             delete y;
@@ -98,9 +106,9 @@ int main()
             }
         }
     }
-    */
+    //*/
     
-    //*
+    /*
     {
         int max = 1000;
         int index = 0;
@@ -154,7 +162,7 @@ int main()
             }
         }
     }
-    //*/
+    */
     
     /*
     //test cleanAdd

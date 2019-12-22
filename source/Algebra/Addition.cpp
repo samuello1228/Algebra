@@ -831,23 +831,14 @@ Addition::Addition(int fundamentalType,unsigned int x)
                     //minimum depth = 5
                     if (depth < 5) depth = 5;
                     
-                    //2^n = exp(exp( ln(ln(2)) + ln(n) ))
-                    Addition* explnln2 = new Addition("\\exp(\\ln(\\ln(2)))");
-                    //explnln2->print();
+                    //y = 2^n = exp(ln(2^n))
+                    Addition* lny = Addition::lnPowerOf2(index);
                     
-                    Addition* n = new Addition(1,index);
-                    explnln2->exp[0]->ln.push_back(n);
-                    n->mother = explnln2->exp[0];
-                    n->motherType = 2;
+                    exp.push_back(lny);
+                    lny->mother = this;
+                    lny->motherType = 1;
                     
-                    //explnln2->print();
-                    //explnln2 = exp( ln(ln(2)) + ln(n) )
-                    
-                    exp.push_back(explnln2);
-                    explnln2->mother = this;
-                    explnln2->motherType = 1;
-                    
-                    if(n->depth +3 > depth) depth = n->depth +3;
+                    if(lny->depth +1 > depth) depth = lny->depth +1;
                 }
                 
                 //x = x - bit, use bitwise XOR
@@ -865,7 +856,6 @@ Addition::Addition(int fundamentalType,unsigned int x)
         
         //reverse order
         reverse(exp.begin(),exp.end());
-        simplification();
         
         return;
     }
