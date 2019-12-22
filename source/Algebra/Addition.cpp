@@ -765,6 +765,27 @@ Addition* Addition::lnPowerOf2(unsigned int x)
     return y;
 }
 
+Addition* Addition::PowerOf2(unsigned int x)
+{
+    //return 2^x
+    if(x==0)
+    {
+        Addition* y = new Addition("1");
+        return y;
+    }
+    else if(x==1)
+    {
+        Addition* y = new Addition("2");
+        return y;
+    }
+    else
+    {
+        Addition* lny = Addition::lnPowerOf2(x);
+        Addition* y = new Addition(1,lny);
+        return y;
+    }
+}
+
 Addition::Addition(int fundamentalType,unsigned int x)
 {
     if(fundamentalType == 1)

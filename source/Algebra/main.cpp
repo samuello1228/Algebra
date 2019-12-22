@@ -103,21 +103,16 @@ int main()
     //*
     {
         int max = 1000;
-        int index = 2;
-        int product = 4;
-        Addition* lnx = Addition::lnPowerOf2(index);
-        Addition* x = new Addition(1,lnx);
+        int index = 0;
+        int product = 1;
+        Addition* x = new Addition("1");
         while(true)
         {
             cout<<"x: 2^"<<index<<endl;
             x->simplification();
             cout<<"y: 2^"<<index<<endl;
             //Addition* y = new Addition(1,product);
-            
-            Addition* lny = Addition::lnPowerOf2(index);
-            Addition* y = new Addition(1,lny);
-            //y->explnCancellation();
-            //y->addCommonTerm();
+            Addition* y = Addition::PowerOf2(index);
             
             if(!Addition::isSame(x,y))
             {
