@@ -78,7 +78,17 @@ public:
     bool haveOnlyInf();
     bool haveOnlyOneItem();
     
-    bool isSemiInterger();
+    struct SemiInterger
+    {
+        int type;
+        //-1: not a semi-interger
+        //0: integer
+        //1: ln(c)
+        //2: ln(ln(c))
+        
+        int integer;
+    };
+    SemiInterger isSemiInterger();
     
     void basicArithmetic();
     void cleanAddOld();

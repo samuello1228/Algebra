@@ -23,23 +23,22 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
-    /*
+    //*
     //test integer
-    for(int i=1; i<=1024; i++)
+    for(int i=1; i<=10000; i++)
     //for(int i=15; i<=15; i++)
     {
         Addition* test1 = new Addition(1,i);
-        cout<<"i = "<<i<<":"<<endl;
-        test1->print();
+        if(i%1000 == 0) cout<<"i = "<<i<<":"<<endl;
+        //test1->print();
         
-        cout<<"start to do integer reduction:"<<endl;
-        test1->print();
+        Addition::SemiInterger x = test1->isSemiInterger();
         
-        if(test1->isSemiInterger())
+        if(x.type != -1)
         {
-            if(test1->isInteger)
+            if(x.type == 0)
             {
-                if(test1->integer != i)
+                if(x.integer != i)
                 {
                     cout<<"Error: The value of integer is wrong."<<endl;
                     break;
@@ -57,11 +56,11 @@ int main()
             break;
         }
         delete test1;
-        cout<<endl;
+        //cout<<endl;
     }
-    */
+    //*/
     
-    //*
+    /*
     {
         int max = 5000;
         int count = 1;
@@ -106,7 +105,7 @@ int main()
             }
         }
     }
-    //*/
+    */
     
     /*
     {

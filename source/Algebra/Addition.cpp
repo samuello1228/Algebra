@@ -1587,182 +1587,172 @@ bool Addition::haveOnlyOneItem()
     else return false;
 }
 
-bool Addition::isSemiInterger()
+Addition::SemiInterger Addition::isSemiInterger()
 {
     //check whether it can be converted to the form: c, ln(c), ln(ln(c))
+    vector<SemiInterger> input;
+    SemiInterger output;
+    
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
-        if(!exp[i]->isSemiInterger()) {isInteger = false; return false;}
+        SemiInterger temp = exp[i]->isSemiInterger();
+        if(temp.type == -1 || temp.type == 0) {output.type = -1; return output;}
+        else
+        {
+            temp.type --;
+            input.push_back(temp);
+        }
     }
     
     for(unsigned int i = 0; i < ln_c.size() ; i++)
     {
-        if(!ln_c[i]->isSemiInterger()) {isInteger = false; return false;}
+        SemiInterger temp = ln_c[i]->isSemiInterger();
+        if(temp.type != 0)
+        {
+            cout<<"Error: ln_c contains non-interger."<<endl;
+            output.type = -1;
+            return output;
+        }
+        else
+        {
+            temp.type = 1;
+            input.push_back(temp);
+        }
     }
     
     for(unsigned int i = 0; i < ln.size() ; i++)
     {
-        if(!ln[i]->isSemiInterger()) {isInteger = false; return false;}
+        SemiInterger temp = ln[i]->isSemiInterger();
+        if(temp.type == -1 || temp.type == 2) {output.type = -1; return output;}
+        else if(temp.type == 0)
+        {
+            cout<<"Error: ln contains interger."<<endl;
+            temp.type = 1;
+            input.push_back(temp);
+        }
+        else if(temp.type == 1)
+        {
+            temp.type = 2;
+            if(temp.integer != 2) cout<<"Error: ln(ln(c)) with c != 2."<<endl;
+            input.push_back(temp);
+        }
     }
     
-    explnCancellation(true);
-    cleanAdd(true);
+    /*
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        SemiInterger temp = add[i]->isSemiInterger();
+        if(temp.type == -1) {output.type = -1; return output;}
+        else input.push_back(temp);
+    }
+    */
     
     //cout<<"start integer reduction:"<<endl;
     //print(true);
     
-    if(nTau) {isInteger = false; return false;}
-    if(nComplex) {isInteger = false; return false;}
-    if(nInfinity) {isInteger = false; return false;}
-    if(exp.size() != 0) {isInteger = false; return false;}
-    if(ln_i.size() != 0) {isInteger = false; return false;}
+    if(nTau) {output.type = -1; return output;}
+    if(nComplex) {output.type = -1; return output;}
+    if(nInfinity) {output.type = -1; return output;}
+    if(ln_i.size() != 0) {output.type = -1; return output;}
     
-    //classify ln to ln_c
-    int index = 0;
-    while(true)
+    unsigned int nc = 0;
+    unsigned int nlnc = 0;
+    unsigned int nlnln2 = 0;
+    for(unsigned int i = 0; i < input.size() ; i++)
     {
-        if(index >= ln.size()) break;
-        
-        if(ln[index]->isInteger)
-        {
-            ln_c.push_back(ln[index]);
-            ln.erase(ln.begin()+index);
-        }
-        else index++;
+        if(input[i].type == 0) nc++;
+        else if(input[i].type == 1) nlnc++;
+        else if(input[i].type == 2) nlnln2++;
+    }
+    
+    if(nlnln2 >= 2)
+    {
+        cout<<"Error: more than one ln(ln(2))."<<endl;
+        output.type = -1;
+        return output;
     }
     
     //Case 1: 1+2+4
     //Case 2: ln(ln(2)) + ln(n_1) + ln(n_2) + ... = ln(ln(2^(n_1*n_2*...)))
     //Case 3: ln(n) + ln(-1) = ln(-n)
-    if(ln_n1.size() == 0 && ln_c.size() == 0 && ln.size() == 0)
+    if(ln_n1.size() == 0 && nlnc == 0 && nlnln2 == 0)
     {
         //Case 1: 1+2+4
-        bool haveOnly2 = haveOnlyTwo();
-        bool isChanged = false;
-        integer = 0;
-        for(unsigned int i = 0; i < add.size() ; i++)
+        output.type = 0;
+        output.integer = 0;
+        
+        if(nNegative) output.integer--;
+        if(nOne) output.integer += 1;
+        if(nTwo) output.integer += 2;
+        
+        for(unsigned int i = 0; i < input.size() ; i++)
         {
-            if(add[i]->isInteger)
-            {
-                integer += add[i]->integer;
-                isChanged = true;
-            }
-            else {isInteger = false; return false;}
+            output.integer += input[i].integer;
         }
         
-        if(nNegative)
-        {
-            integer--;
-            isChanged = true;
-        }
-        
-        if(nOne)
-        {
-            integer += 1;
-            isChanged = true;
-        }
-        
-        if(nTwo)
-        {
-            integer += 2;
-            isChanged = true;
-        }
-        
-        //delete
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            delete add[i];
-        }
-        add.clear();
-        
-        nNegative = false;
-        nOne = false;
-        nTwo = false;
-        
-        isInteger = true;
-        if(isChanged && !haveOnly2)
+        if(output.integer != 2)
         {
             //cout<<"isSemiInterger: 1+2+4+..."<<endl;
             //getTopmost()->print(true);
         }
-        return true;
+        return output;
     }
-    else if(ln_n1.size() == 0 && (ln_c.size() + ln.size()) >= 1)
+    else if(ln_n1.size() == 0 && (nlnc + nlnln2) >= 1)
     {
         //Case 2: ln(ln(2)) + ln(n_1) + ln(n_2) + ... = ln(ln(2^(n_1*n_2*...)))
-        if(nNegative) {isInteger = false; return false;}
-        if(nOne) {isInteger = false; return false;}
-        if(nTwo) {isInteger = false; return false;}
-        if(add.size() != 0) {isInteger = false; return false;}
+        if(nNegative) {output.type = -1; return output;}
+        if(nOne) {output.type = -1; return output;}
+        if(nTwo) {output.type = -1; return output;}
         
-        if(ln_c.size() >= 2)
+        //ln(n_1) + ln(n_2) = ln(n_1*n_2)
+        output.integer = 1;
+        for(unsigned int i = 0; i < input.size() ; i++)
         {
-            int index = 1;
-            while(true)
-            {
-                if(index >= ln_c.size()) break;
-                
-                //calculate ln(n_1) + ln(n_2) = ln(n_1*n_2)
-                ln_c[0]->integer *= ln_c[index]->integer;
-                
-                //delete
-                delete ln_c[index];
-                ln_c.erase(ln_c.begin()+index);
-            }
-            
+            if(input[i].type == 1) output.integer *= input[i].integer;
+        }
+        
+        if(nlnc >= 2)
+        {
             //cout<<"isSemiInterger: ln(n_1) + ln(n_2) = ln(n_1*n_2)"<<endl;
             //getTopmost()->print(true);
         }
         
-        if(ln.size() == 1)
+        if(nlnln2 == 1)
         {
-            //search for ln(ln(2))
-            if(ln[0]->nNegative) {isInteger = false; return false;}
-            if(ln[0]->nOne) {isInteger = false; return false;}
-            if(ln[0]->nTwo) {isInteger = false; return false;}
-            if(ln[0]->nTau) {isInteger = false; return false;}
-            if(ln[0]->nComplex) {isInteger = false; return false;}
-            if(ln[0]->nInfinity) {isInteger = false; return false;}
-            if(ln[0]->exp.size() != 0) {isInteger = false; return false;}
-            if(ln[0]->ln_n1.size() != 0) {isInteger = false; return false;}
-            if(ln[0]->ln_i.size() != 0) {isInteger = false; return false;}
-            if(ln[0]->ln.size() != 0) {isInteger = false; return false;}
-            if(ln[0]->add.size() != 0) {isInteger = false; return false;}
-            
-            if(ln[0]->ln_c.size() != 1) {isInteger = false; return false;}
-            if(ln[0]->ln_c[0]->integer != 2) {isInteger = false; return false;}
-            
             //ln(ln(2)) + ln(n) = ln(ln(2^n))
-            if(ln_c.size() == 1)
+            if(nlnc >= 1)
             {
-                //search for ln(n)
-                if(ln_c[0]->integer <= 1) {isInteger = false; return false;}
+                if(output.integer <= 1) {output.type = -1; return output;}
                 
                 //calculate ln(ln(2^n))
-                ln[0]->ln_c[0]->integer = 1 << ln_c[0]->integer;
-                
-                //delete
-                delete ln_c[0];
-                ln_c.clear();
+                output.integer = 1 << output.integer;
                 
                 //cout<<"isSemiInterger: ln(ln(2)) + ln(n) = ln(ln(2^n))"<<endl;
                 //getTopmost()->print(true);
             }
+            else
+            {
+                output.integer = 2;
+            }
+            
+            output.type = 2;
+        }
+        else
+        {
+            output.type = 1;
         }
         
-        isInteger = false;
-        return true;
+        return output;
     }
     else if(ln_n1.size() == 1 && ln_c.size() == 1 && ln.size() == 0)
     {
         //Case 3: ln(n) + ln(-1) = ln(-n)
-        cout<<"isSemiInterger: ln(n) + ln(-1) = ln(-n)"<<endl;
-        getTopmost()->print(true);
+        //cout<<"isSemiInterger: ln(n) + ln(-1) = ln(-n)"<<endl;
+        //getTopmost()->print(true);
         
-        isInteger = false;
-        return true;
+        return output;
     }
-    else {isInteger = false; return false;}
+    else {output.type = -1; return output;}
 }
 
 void Addition::cleanAdd(bool isPrintInteger)
