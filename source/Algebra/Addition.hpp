@@ -47,9 +47,6 @@ public:
     vector<Addition*> ln; //List of other: ln(x1) + ln(x2) + ...
     vector<Addition*> add; //List: x1 + x2
     
-    bool isInteger;  //for integer conversion
-    int integer; //for integer conversion
-    
     //Constructor
     Addition();
     Addition(string latex);

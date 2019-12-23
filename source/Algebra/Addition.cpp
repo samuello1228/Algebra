@@ -1035,6 +1035,16 @@ string Addition::getLatex(bool isPrintInteger)
 {
     string output;
     
+    if(isPrintInteger)
+    {
+        Addition::SemiInterger temp = isSemiInterger();
+        if(temp.type == 0)
+        {
+            output = std::to_string(temp.integer);
+            return output;
+        }
+    }
+    
     if(nZero)
     {
         output += " + 0";
@@ -1189,12 +1199,6 @@ string Addition::getLatex(bool isPrintInteger)
     //erase " + "
     if(output.size() == 0)
     {
-        if(isPrintInteger && isInteger)
-        {
-            output = std::to_string(integer);
-            return output;
-        }
-        
         cout<<"Error: getLatex: the expression is empty"<<endl;
     }
     else output.erase(0,3);
