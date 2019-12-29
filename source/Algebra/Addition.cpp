@@ -156,7 +156,7 @@ bool Addition::isSame(Addition* x1,Addition* x2)
     
     if(!isSameList(x1->exp,x2->exp)) return false;
     if(!isSameList(x1->ln_n1,x2->ln_n1)) return false;
-    if(!isSameList(x1->ln_c,x2->ln_c)) return false;
+    if(!isSameList(x1->ln_2,x2->ln_2)) return false;
     if(!isSameList(x1->ln_i,x2->ln_i)) return false;
     if(!isSameList(x1->ln,x2->ln)) return false;
     if(!isSameList(x1->add,x2->add)) return false;
@@ -396,7 +396,7 @@ Addition::Addition(string latex)
                 nInfinity = false;
                 
                 if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-                else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_c.push_back(operand);
+                else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_2.push_back(operand);
                 else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
                 else ln.push_back(operand);
                 
@@ -714,7 +714,7 @@ Addition* Addition::lnPowerOf2(unsigned int x)
                 y->depth = 2;
                 
                 Addition* two = new Addition("2");
-                y->ln_c.push_back(two);
+                y->ln_2.push_back(two);
                 two->mother = y;
                 two->motherType = 2;
             }
@@ -918,7 +918,7 @@ Addition::Addition(int compositeType, Addition* operand)
     else if(compositeType == 2)
     {
         if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-        else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_c.push_back(operand);
+        else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_2.push_back(operand);
         else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
         else ln.push_back(operand);
     }
@@ -1010,9 +1010,9 @@ Addition::~Addition()
         delete ln_n1[i];
     }
     
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
-        delete ln_c[i];
+        delete ln_2[i];
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1131,17 +1131,17 @@ string Addition::getLatex(bool isPrintInteger)
         }
     }
     
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
         output += " + \\\\ln(";
-        output += ln_c[i]->getLatex(isPrintInteger);
+        output += ln_2[i]->getLatex(isPrintInteger);
         output += ")";
         
-        if(ln_c[i]->mother != this)
+        if(ln_2[i]->mother != this)
         {
             cout<<"Error: ln_c["<<i<<"]: the mother link is wrong"<<endl;
         }
-        if(ln_c[i]->motherType != 2)
+        if(ln_2[i]->motherType != 2)
         {
             cout<<"Error: ln_c["<<i<<"]: the motherType is wrong"<<endl;
         }
@@ -1257,13 +1257,13 @@ Addition* Addition::getCopy()
         copy->ln_n1.push_back(element);
     }
     
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
-        Addition* element = ln_c[i]->getCopy();
+        Addition* element = ln_2[i]->getCopy();
         element->mother = copy;
         element->motherType = 2;
         
-        copy->ln_c.push_back(element);
+        copy->ln_2.push_back(element);
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1338,10 +1338,10 @@ void Addition::fillDepthOrder()
         updateDepthOrder(depth,orderType,order, ln_n1[i]->depth +1, ln_n1[i]->orderType, ln_n1[i]->order -1);
     }
     
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
-        ln_c[i]->fillDepthOrder();
-        updateDepthOrder(depth,orderType,order, ln_c[i]->depth +1, ln_c[i]->orderType, ln_c[i]->order -1);
+        ln_2[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_2[i]->depth +1, ln_2[i]->orderType, ln_2[i]->order -1);
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1377,7 +1377,7 @@ void Addition::classifyln()
         }
         else if(ln[index]->haveOnlyOne() || ln[index]->haveOnlyTwo())
         {
-            ln_c.push_back(ln[index]);
+            ln_2.push_back(ln[index]);
             ln.erase(ln.begin()+index);
         }
         else if(ln[index]->haveOnlyComplex())
@@ -1406,7 +1406,7 @@ bool Addition::isEmpty()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1431,7 +1431,7 @@ bool Addition::haveOnlyZero()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1456,7 +1456,7 @@ bool Addition::haveOnlyNegativeOne()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1481,7 +1481,7 @@ bool Addition::haveOnlyOne()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1506,7 +1506,7 @@ bool Addition::haveOnlyTwo()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1531,7 +1531,7 @@ bool Addition::haveOnlyComplex()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1556,7 +1556,7 @@ bool Addition::haveOnlyInf()
     
     if(exp.size() != 0) return false;
     if(ln_n1.size() != 0) return false;
-    if(ln_c.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
     if(ln_i.size() != 0) return false;
     if(ln.size() != 0) return false;
     if(add.size() != 0) return false;
@@ -1582,7 +1582,7 @@ bool Addition::haveOnlyOneItem()
     
     sum += exp.size();
     sum += ln_n1.size();
-    sum += ln_c.size();
+    sum += ln_2.size();
     sum += ln_i.size();
     sum += ln.size();
     sum += add.size();
@@ -1608,9 +1608,9 @@ Addition::SemiInterger Addition::isSemiInterger()
         }
     }
     
-    for(unsigned int i = 0; i < ln_c.size() ; i++)
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
-        SemiInterger temp = ln_c[i]->isSemiInterger();
+        SemiInterger temp = ln_2[i]->isSemiInterger();
         if(temp.type != 0)
         {
             cout<<"Error: ln_c contains non-interger."<<endl;
@@ -1748,7 +1748,7 @@ Addition::SemiInterger Addition::isSemiInterger()
         
         return output;
     }
-    else if(ln_n1.size() == 1 && ln_c.size() == 1 && ln.size() == 0)
+    else if(ln_n1.size() == 1 && ln_2.size() == 1 && ln.size() == 0)
     {
         //Case 3: ln(n) + ln(-1) = ln(-n)
         //cout<<"isSemiInterger: ln(n) + ln(-1) = ln(-n)"<<endl;
@@ -1799,13 +1799,13 @@ void Addition::cleanAdd(bool isPrintInteger)
     
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        for(unsigned int j = 0; j < add[i]->ln_c.size() ; j++)
+        for(unsigned int j = 0; j < add[i]->ln_2.size() ; j++)
         {
-            ln_c.push_back(add[i]->ln_c[j]);
-            add[i]->ln_c[j]->mother = this;
+            ln_2.push_back(add[i]->ln_2[j]);
+            add[i]->ln_2[j]->mother = this;
             isChanged = true;
         }
-        add[i]->ln_c.clear();
+        add[i]->ln_2.clear();
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
@@ -1897,14 +1897,14 @@ void Addition::explnCancellation(bool isPrintInteger)
         if(exp[index]->add.size() != 0) {index++; continue;}
         
         if(exp[index]->ln_n1.size() +
-           exp[index]->ln_c.size()  +
+           exp[index]->ln_2.size()  +
            exp[index]->ln_i.size()  +
            exp[index]->ln.size() != 1) {index++; continue;}
         
         //move x to add
         vector<Addition*>* ln_x = nullptr;
         if     (exp[index]->ln_n1.size() == 1) ln_x = &(exp[index]->ln_n1);
-        else if(exp[index]->ln_c.size() == 1)  ln_x = &(exp[index]->ln_c);
+        else if(exp[index]->ln_2.size() == 1)  ln_x = &(exp[index]->ln_2);
         else if(exp[index]->ln_i.size() == 1)  ln_x = &(exp[index]->ln_i);
         else if(exp[index]->ln.size() == 1)    ln_x = &(exp[index]->ln);
         
@@ -1953,7 +1953,7 @@ void Addition::explnCancellation(bool isPrintInteger)
         if(nVariable) {index++; continue;}
         
         if(ln[index]->ln_n1.size() != 0) {index++; continue;}
-        if(ln[index]->ln_c.size() != 0) {index++; continue;}
+        if(ln[index]->ln_2.size() != 0) {index++; continue;}
         if(ln[index]->ln_i.size() != 0) {index++; continue;}
         if(ln[index]->ln.size() != 0) {index++; continue;}
         if(ln[index]->add.size() != 0) {index++; continue;}
@@ -2064,9 +2064,9 @@ void Addition::addInf()
             delete ln_n1[i];
         }
         
-        for(unsigned int i = 0; i < ln_c.size() ; i++)
+        for(unsigned int i = 0; i < ln_2.size() ; i++)
         {
-            delete ln_c[i];
+            delete ln_2[i];
         }
         
         for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -2086,7 +2086,7 @@ void Addition::addInf()
         
         exp.clear();
         ln_n1.clear();
-        ln_c.clear();
+        ln_2.clear();
         ln_i.clear();
         ln.clear();
         add.clear();
@@ -2230,9 +2230,9 @@ void Addition::ln_1nic()
     {
         int count_one = 0;
         int count_c = 0;
-        for(unsigned int j = 0; j < ln_c.size() ; j++)
+        for(unsigned int j = 0; j < ln_2.size() ; j++)
         {
-            if(ln_c[j]->nOne)
+            if(ln_2[j]->nOne)
             {
                 count_one++;
             }
@@ -2251,12 +2251,12 @@ void Addition::ln_1nic()
         int index = 0;
         while(true)
         {
-            if(index >= ln_c.size()) break;
+            if(index >= ln_2.size()) break;
             
-            if(ln_c[index]->nOne)
+            if(ln_2[index]->nOne)
             {
-                delete ln_c[index];
-                ln_c.erase(ln_c.begin()+index);
+                delete ln_2[index];
+                ln_2.erase(ln_2.begin()+index);
             }
             else index++;
         }
@@ -2362,11 +2362,11 @@ void Addition::expand()
                 
                 oldExplnItem->ln_n1.erase(oldExplnItem->ln_n1.begin());
             }
-            else if(oldExplnItem->ln_c.size() >= 1)
+            else if(oldExplnItem->ln_2.size() >= 1)
             {
-                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_c[0]);
+                newExpItem->ln[lnIndex] = new Addition(2,oldExplnItem->ln_2[0]);
                 
-                oldExplnItem->ln_c.erase(oldExplnItem->ln_c.begin());
+                oldExplnItem->ln_2.erase(oldExplnItem->ln_2.begin());
             }
             else if(oldExplnItem->ln_i.size() >= 1)
             {
@@ -2519,7 +2519,7 @@ void Addition::addCommonTerm()
                     Addition* four = new Addition("\\exp(\\ln(\\ln(2)))");
                     
                     Addition* two = new Addition("2");
-                    four->exp[0]->ln_c.push_back(two);
+                    four->exp[0]->ln_2.push_back(two);
                     two->mother = four->exp[0];
                     two->motherType = 2;
                     
@@ -2597,25 +2597,25 @@ void Addition::addCommonTerm()
     while(true)
     {
         bool isFound = false;
-        for(unsigned int i = 0; i < ln_c.size() ; i++)
+        for(unsigned int i = 0; i < ln_2.size() ; i++)
         {
-            for(unsigned int j = i+1; j < ln_c.size() ; j++)
+            for(unsigned int j = i+1; j < ln_2.size() ; j++)
             {
-                if(isSame(ln_c[i],ln_c[j]))
+                if(isSame(ln_2[i],ln_2[j]))
                 {
                     isFound = true;
                     
                     //delete ln_c[j]
-                    delete ln_c[j];
-                    ln_c.erase(ln_c.begin()+j);
+                    delete ln_2[j];
+                    ln_2.erase(ln_2.begin()+j);
                     
                     //create ln(2)
                     Addition* ln2 = new Addition("\\ln(2)");
                     
                     //move ln_c[i]
-                    Addition* lnx = new Addition(2,ln_c[i]);
+                    Addition* lnx = new Addition(2,ln_2[i]);
                     //erase ln_c[i]
-                    ln_c.erase(ln_c.begin()+i);
+                    ln_2.erase(ln_2.begin()+i);
                     
                     //create ln(2) + ln(ln(x))
                     ln2->ln.push_back(lnx);
@@ -2662,7 +2662,7 @@ void Addition::addCommonTerm()
                     //modift exp[i]
                     Addition* two = new Addition("2");
                     
-                    exp[i]->ln_c.push_back(two);
+                    exp[i]->ln_2.push_back(two);
                     two->mother = exp[i];
                     two->motherType = 2;
                     
