@@ -271,9 +271,7 @@ Addition::Addition(string latex)
                 add.push_back(operand);
             }
             
-            sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
-                return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-            });
+            //sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);});
             
             return;
         }
@@ -993,9 +991,7 @@ Addition::Addition(Addition* operand1, Addition* operand2)
     add.push_back(operand1);
     add.push_back(operand2);
     
-    sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{
-        return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);
-    });
+    //sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);});
 }
 
 Addition::~Addition()
@@ -1037,7 +1033,7 @@ string Addition::getLatex(bool isPrintInteger)
     
     if(isPrintInteger)
     {
-        Addition::SemiInterger temp = isSemiInterger();
+        SemiInterger temp = isSemiInterger();
         if(temp.type == 0)
         {
             output = std::to_string(temp.integer);
@@ -1591,7 +1587,7 @@ bool Addition::haveOnlyOneItem()
     else return false;
 }
 
-Addition::SemiInterger Addition::isSemiInterger()
+SemiInterger Addition::isSemiInterger()
 {
     //check whether it can be converted to the form: c, ln(c), ln(ln(c))
     vector<SemiInterger> input;

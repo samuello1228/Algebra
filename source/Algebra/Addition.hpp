@@ -12,6 +12,17 @@
 #include<vector>
 using namespace std;
 
+struct SemiInterger
+{
+    int type;
+    //-1: not a semi-interger
+    //0: integer
+    //1: ln(c)
+    //2: ln(ln(c))
+    
+    int integer;
+};
+
 class Addition
 {
 public:
@@ -37,17 +48,22 @@ public:
     bool nTau; //number of tau = pi/2
     bool nComplex; //number of i
     bool nInfinity; //number of -Infinity
+    
+    vector<bool> constant; //number of c_1, c_2, ...
     vector<bool> variable; //number of x, number of y, ...
     
     //Composite
-    vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
     vector<Addition*> exp_lnlnc; //List: exp(x), x = ln(ln(2^n)), n >= 2
+    vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
+    
+    vector<Addition*> ln_1; //List: ln(1)
     vector<Addition*> ln_2; //List: ln(2)
     vector<Addition*> ln_N; //List: ln(c), c is positive integer, c >= 3
     vector<Addition*> ln_n1; //List: ln(-1) + ln(-1) + ...
     vector<Addition*> ln_i; //List: ln(i) + ln(i) + ...
     //vector<Addition*> ln_c; //List: ln(c), c is constant
     vector<Addition*> ln; //List of other: ln(x1) + ln(x2) + ...
+    
     vector<Addition*> add; //List: x1 + x2
     
     //Constructor
@@ -77,17 +93,6 @@ public:
     bool haveOnlyComplex();
     bool haveOnlyInf();
     bool haveOnlyOneItem();
-    
-    struct SemiInterger
-    {
-        int type;
-        //-1: not a semi-interger
-        //0: integer
-        //1: ln(c)
-        //2: ln(ln(c))
-        
-        int integer;
-    };
     SemiInterger isSemiInterger();
     
     void basicArithmetic();

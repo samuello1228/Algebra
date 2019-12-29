@@ -35,7 +35,7 @@ int main()
         Addition* test2 = new Addition(1,test1);
         test2->print(true);
         
-        Addition::SemiInterger x = test1->isSemiInterger();
+        SemiInterger x = test1->isSemiInterger();
         
         if(x.type != -1)
         {
