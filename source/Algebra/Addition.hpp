@@ -54,11 +54,13 @@ public:
     vector<bool> variable; //number of x, number of y, ...
     
     //Composite
+    vector<Addition*> exp_lnc; //List: exp(x), x = ln(2^n), n >= 2
     vector<Addition*> exp_lnlnc; //List: exp(x), x = ln(ln(2^n)), n >= 2
     vector<Addition*> exp; //List: exp(x1) + exp(x2) + ...
     
     vector<Addition*> ln_1; //List: ln(1)
     vector<Addition*> ln_2; //List: ln(2)
+    vector<Addition*> ln_ln2; //List: ln(ln(2))
     vector<Addition*> ln_N; //List: ln(c), c is positive integer, c >= 3
     vector<Addition*> ln_n1; //List: ln(-1) + ln(-1) + ...
     vector<Addition*> ln_i; //List: ln(i) + ln(i) + ...
@@ -71,7 +73,7 @@ public:
     Addition();
     Addition(string latex);
     static Addition* lnPowerOf2(unsigned int x); //return ln(2^x)
-    static Addition* PowerOf2(unsigned int x); //return 2^x
+    //static Addition* PowerOf2(unsigned int x); //return 2^x
     Addition(int fundamentalType, unsigned int x); //fundamentalType: 1 = positveInterger, 2 = the nth variable
     Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln, 3 = add
     Addition(Addition* operand1, Addition* operand2); // addition
@@ -86,6 +88,7 @@ public:
     void classifyln();
     static bool isSame(Addition* x1,Addition* x2);
     
+    bool AllListIsEmpty();
     bool isEmpty();
     bool haveOnlyZero();
     bool haveOnlyNegativeOne();
@@ -99,8 +102,8 @@ public:
     void basicArithmetic();
     void cleanAddOld();
     
-    void cleanAdd(bool isPrintInteger = false);
-    void explnCancellation(bool isPrintInteger = false);
+    void cleanAdd(bool isPrint = true);
+    void explnCancellation(bool isPrint = true);
     
     bool lnInf();
     void ln0();

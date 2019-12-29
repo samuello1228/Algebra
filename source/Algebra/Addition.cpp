@@ -148,17 +148,32 @@ bool Addition::isSame(Addition* x1,Addition* x2)
     if(x1->nComplex != x2->nComplex) return false;
     if(x1->nInfinity != x2->nInfinity) return false;
     
+    if(x1->constant.size() != x2->constant.size()) return false;
+    for(unsigned int i = 0; i < x1->constant.size() ; i++)
+    {
+        if(x1->constant[i] != x2->constant[i]) return false;
+    }
+    
     if(x1->variable.size() != x2->variable.size()) return false;
     for(unsigned int i = 0; i < x1->variable.size() ; i++)
     {
         if(x1->variable[i] != x2->variable[i]) return false;
     }
     
+    //List of exp
+    if(!isSameList(x1->exp_lnc,x2->exp_lnc)) return false;
+    if(!isSameList(x1->exp_lnlnc,x2->exp_lnlnc)) return false;
     if(!isSameList(x1->exp,x2->exp)) return false;
-    if(!isSameList(x1->ln_n1,x2->ln_n1)) return false;
+    
+    //List of ln
+    if(!isSameList(x1->ln_1,x2->ln_1)) return false;
     if(!isSameList(x1->ln_2,x2->ln_2)) return false;
+    if(!isSameList(x1->ln_ln2,x2->ln_ln2)) return false;
+    if(!isSameList(x1->ln_N,x2->ln_N)) return false;
+    if(!isSameList(x1->ln_n1,x2->ln_n1)) return false;
     if(!isSameList(x1->ln_i,x2->ln_i)) return false;
     if(!isSameList(x1->ln,x2->ln)) return false;
+    
     if(!isSameList(x1->add,x2->add)) return false;
     
     return true;
@@ -332,7 +347,12 @@ Addition::Addition(string latex)
                 nComplex = false;
                 nInfinity = false;
                 
-                exp.push_back(operand);
+                //List of exp
+                SemiInterger temp = operand->isSemiInterger();
+                if(temp.type == 1) exp_lnc.push_back(operand);
+                else if(temp.type == 2) exp_lnlnc.push_back(operand);
+                else exp.push_back(operand);
+                
                 return;
             }
             else index++;
@@ -393,10 +413,18 @@ Addition::Addition(string latex)
                 nComplex = false;
                 nInfinity = false;
                 
-                if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-                else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_2.push_back(operand);
+                //List of ln
+                if(operand->haveOnlyOne()) ln_1.push_back(operand);
+                else if(operand->haveOnlyTwo()) ln_2.push_back(operand);
+                else if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
                 else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
-                else ln.push_back(operand);
+                else
+                {
+                    SemiInterger temp = operand->isSemiInterger();
+                    if(temp.type == 1 && temp.integer == 2) ln_ln2.push_back(operand);
+                    else if(temp.type == 0) ln_N.push_back(operand);
+                    else ln.push_back(operand);
+                }
                 
                 return;
             }
@@ -730,14 +758,14 @@ Addition* Addition::lnPowerOf2(unsigned int x)
                 Addition* ln2 = new Addition("\\ln(2)");
                 
                 //ln(ln(2)) + ln(2^index)
-                lnn->ln.push_back(ln2);
+                lnn->ln_ln2.push_back(ln2);
                 ln2->mother = lnn;
                 ln2->motherType = 2;
                 
                 //lnn = ln(ln(2)) + ln(2^index)
                 //lnn->print();
                 
-                y->exp.push_back(lnn);
+                y->exp_lnlnc.push_back(lnn);
                 lnn->mother = y;
                 lnn->motherType = 1;
                 
@@ -758,11 +786,12 @@ Addition* Addition::lnPowerOf2(unsigned int x)
     }
     
     //reverse order
-    reverse(y->exp.begin(),y->exp.end());
+    reverse(y->exp_lnlnc.begin(),y->exp_lnlnc.end());
     
     return y;
 }
 
+/*
 Addition* Addition::PowerOf2(unsigned int x)
 {
     //return 2^x
@@ -783,6 +812,7 @@ Addition* Addition::PowerOf2(unsigned int x)
         return y;
     }
 }
+*/
 
 Addition::Addition(int fundamentalType,unsigned int x)
 {
@@ -832,7 +862,7 @@ Addition::Addition(int fundamentalType,unsigned int x)
                     //y = 2^n = exp(ln(2^n))
                     Addition* lny = Addition::lnPowerOf2(index);
                     
-                    exp.push_back(lny);
+                    exp_lnc.push_back(lny);
                     lny->mother = this;
                     lny->motherType = 1;
                     
@@ -853,7 +883,7 @@ Addition::Addition(int fundamentalType,unsigned int x)
         }
         
         //reverse order
-        reverse(exp.begin(),exp.end());
+        reverse(exp_lnc.begin(),exp_lnc.end());
         
         return;
     }
@@ -912,13 +942,28 @@ Addition::Addition(int compositeType, Addition* operand)
     nComplex = false;
     nInfinity = false;
     
-    if(compositeType == 1) exp.push_back(operand);
+    if(compositeType == 1)
+    {
+        //List of exp
+        SemiInterger temp = operand->isSemiInterger();
+        if(temp.type == 1) exp_lnc.push_back(operand);
+        else if(temp.type == 2) exp_lnlnc.push_back(operand);
+        else exp.push_back(operand);
+    }
     else if(compositeType == 2)
     {
-        if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
-        else if(operand->haveOnlyOne() || operand->haveOnlyTwo()) ln_2.push_back(operand);
+        //List of ln
+        if(operand->haveOnlyOne()) ln_1.push_back(operand);
+        else if(operand->haveOnlyTwo()) ln_2.push_back(operand);
+        else if(operand->haveOnlyNegativeOne()) ln_n1.push_back(operand);
         else if(operand->haveOnlyComplex()) ln_i.push_back(operand);
-        else ln.push_back(operand);
+        else
+        {
+            SemiInterger temp = operand->isSemiInterger();
+            if(temp.type == 1 && temp.integer == 2) ln_ln2.push_back(operand);
+            else if(temp.type == 0) ln_N.push_back(operand);
+            else ln.push_back(operand);
+        }
     }
     else if(compositeType == 3) add.push_back(operand);
 }
@@ -996,19 +1041,46 @@ Addition::Addition(Addition* operand1, Addition* operand2)
 
 Addition::~Addition()
 {
+    //List of exp
+    for(unsigned int i = 0; i < exp_lnc.size() ; i++)
+    {
+        delete exp_lnc[i];
+    }
+    
+    for(unsigned int i = 0; i < exp_lnlnc.size() ; i++)
+    {
+        delete exp_lnlnc[i];
+    }
+    
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
         delete exp[i];
     }
     
-    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    //List of ln
+    for(unsigned int i = 0; i < ln_1.size() ; i++)
     {
-        delete ln_n1[i];
+        delete ln_1[i];
     }
     
     for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
         delete ln_2[i];
+    }
+    
+    for(unsigned int i = 0; i < ln_ln2.size() ; i++)
+    {
+        delete ln_ln2[i];
+    }
+    
+    for(unsigned int i = 0; i < ln_N.size() ; i++)
+    {
+        delete ln_N[i];
+    }
+    
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        delete ln_n1[i];
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1076,6 +1148,15 @@ string Addition::getLatex(bool isPrintInteger)
         output += " + (-\\\\infty)";
     }
     
+    for(unsigned int i = 0; i < constant.size() ; i++)
+    {
+        if(constant[i])
+        {
+            output += " + c_";
+            output += std::to_string(i);
+        }
+    }
+    
     for(unsigned int i = 0; i < variable.size() ; i++)
     {
         if(variable[i])
@@ -1095,6 +1176,39 @@ string Addition::getLatex(bool isPrintInteger)
         }
     }
     
+    //List of exp
+    for(unsigned int i = 0; i < exp_lnc.size() ; i++)
+    {
+        output += " + \\\\exp(";
+        output += exp_lnc[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(exp_lnc[i]->mother != this)
+        {
+            cout<<"Error: exp_lnc["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(exp_lnc[i]->motherType != 1)
+        {
+            cout<<"Error: exp_lnc["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
+    for(unsigned int i = 0; i < exp_lnlnc.size() ; i++)
+    {
+        output += " + \\\\exp(";
+        output += exp_lnlnc[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(exp_lnlnc[i]->mother != this)
+        {
+            cout<<"Error: exp_lnlnc["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(exp_lnlnc[i]->motherType != 1)
+        {
+            cout<<"Error: exp_lnlnc["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
         output += " + \\\\exp(";
@@ -1111,6 +1225,71 @@ string Addition::getLatex(bool isPrintInteger)
         }
     }
     
+    //List of ln
+    for(unsigned int i = 0; i < ln_1.size() ; i++)
+    {
+        output += " + \\\\ln(";
+        output += ln_1[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(ln_1[i]->mother != this)
+        {
+            cout<<"Error: ln_1["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_1[i]->motherType != 2)
+        {
+            cout<<"Error: ln_1["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
+    {
+        output += " + \\\\ln(";
+        output += ln_2[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(ln_2[i]->mother != this)
+        {
+            cout<<"Error: ln_2["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_2[i]->motherType != 2)
+        {
+            cout<<"Error: ln_2["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
+    for(unsigned int i = 0; i < ln_ln2.size() ; i++)
+    {
+        output += " + \\\\ln(";
+        output += ln_ln2[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(ln_ln2[i]->mother != this)
+        {
+            cout<<"Error: ln_ln2["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_ln2[i]->motherType != 2)
+        {
+            cout<<"Error: ln_ln2["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
+    for(unsigned int i = 0; i < ln_N.size() ; i++)
+    {
+        output += " + \\\\ln(";
+        output += ln_N[i]->getLatex(isPrintInteger);
+        output += ")";
+        
+        if(ln_N[i]->mother != this)
+        {
+            cout<<"Error: ln_N["<<i<<"]: the mother link is wrong"<<endl;
+        }
+        if(ln_N[i]->motherType != 2)
+        {
+            cout<<"Error: ln_N["<<i<<"]: the motherType is wrong"<<endl;
+        }
+    }
+    
     for(unsigned int i = 0; i < ln_n1.size() ; i++)
     {
         output += " + \\\\ln(";
@@ -1124,22 +1303,6 @@ string Addition::getLatex(bool isPrintInteger)
         if(ln_n1[i]->motherType != 2)
         {
             cout<<"Error: ln_n1["<<i<<"]: the motherType is wrong"<<endl;
-        }
-    }
-    
-    for(unsigned int i = 0; i < ln_2.size() ; i++)
-    {
-        output += " + \\\\ln(";
-        output += ln_2[i]->getLatex(isPrintInteger);
-        output += ")";
-        
-        if(ln_2[i]->mother != this)
-        {
-            cout<<"Error: ln_c["<<i<<"]: the mother link is wrong"<<endl;
-        }
-        if(ln_2[i]->motherType != 2)
-        {
-            cout<<"Error: ln_c["<<i<<"]: the motherType is wrong"<<endl;
         }
     }
     
@@ -1230,9 +1393,33 @@ Addition* Addition::getCopy()
     copy->nComplex = nComplex;
     copy->nInfinity = nInfinity;
     
+    for(unsigned int i = 0; i < constant.size() ; i++)
+    {
+        copy->constant.push_back(constant[i]);
+    }
+    
     for(unsigned int i = 0; i < variable.size() ; i++)
     {
         copy->variable.push_back(variable[i]);
+    }
+    
+    //List of exp
+    for(unsigned int i = 0; i < exp_lnc.size() ; i++)
+    {
+        Addition* element = exp_lnc[i]->getCopy();
+        element->mother = copy;
+        element->motherType = 1;
+        
+        copy->exp_lnc.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < exp_lnlnc.size() ; i++)
+    {
+        Addition* element = exp_lnlnc[i]->getCopy();
+        element->mother = copy;
+        element->motherType = 1;
+        
+        copy->exp_lnlnc.push_back(element);
     }
     
     for(unsigned int i = 0; i < exp.size() ; i++)
@@ -1244,13 +1431,14 @@ Addition* Addition::getCopy()
         copy->exp.push_back(element);
     }
     
-    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    //List of ln
+    for(unsigned int i = 0; i < ln_1.size() ; i++)
     {
-        Addition* element = ln_n1[i]->getCopy();
+        Addition* element = ln_1[i]->getCopy();
         element->mother = copy;
         element->motherType = 2;
         
-        copy->ln_n1.push_back(element);
+        copy->ln_1.push_back(element);
     }
     
     for(unsigned int i = 0; i < ln_2.size() ; i++)
@@ -1260,6 +1448,33 @@ Addition* Addition::getCopy()
         element->motherType = 2;
         
         copy->ln_2.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln_ln2.size() ; i++)
+    {
+        Addition* element = ln_ln2[i]->getCopy();
+        element->mother = copy;
+        element->motherType = 2;
+        
+        copy->ln_ln2.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln_N.size() ; i++)
+    {
+        Addition* element = ln_N[i]->getCopy();
+        element->mother = copy;
+        element->motherType = 2;
+        
+        copy->ln_N.push_back(element);
+    }
+    
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        Addition* element = ln_n1[i]->getCopy();
+        element->mother = copy;
+        element->motherType = 2;
+        
+        copy->ln_n1.push_back(element);
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1322,22 +1537,54 @@ void Addition::fillDepthOrder()
     
     if(existVariable) updateDepthOrder(depth,orderType,order,1,2,0);
     
+    //List of exp
+    for(unsigned int i = 0; i < exp_lnc.size() ; i++)
+    {
+        exp_lnc[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, exp_lnc[i]->depth +1, exp_lnc[i]->orderType, exp_lnc[i]->order +1);
+    }
+    
+    for(unsigned int i = 0; i < exp_lnlnc.size() ; i++)
+    {
+        exp_lnlnc[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, exp_lnlnc[i]->depth +1, exp_lnlnc[i]->orderType, exp_lnlnc[i]->order +1);
+    }
+    
     for(unsigned int i = 0; i < exp.size() ; i++)
     {
         exp[i]->fillDepthOrder();
         updateDepthOrder(depth,orderType,order, exp[i]->depth +1, exp[i]->orderType, exp[i]->order +1);
     }
     
-    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    //List of ln
+    for(unsigned int i = 0; i < ln_1.size() ; i++)
     {
-        ln_n1[i]->fillDepthOrder();
-        updateDepthOrder(depth,orderType,order, ln_n1[i]->depth +1, ln_n1[i]->orderType, ln_n1[i]->order -1);
+        ln_1[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_1[i]->depth +1, ln_1[i]->orderType, ln_1[i]->order -1);
     }
     
     for(unsigned int i = 0; i < ln_2.size() ; i++)
     {
         ln_2[i]->fillDepthOrder();
         updateDepthOrder(depth,orderType,order, ln_2[i]->depth +1, ln_2[i]->orderType, ln_2[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < ln_ln2.size() ; i++)
+    {
+        ln_ln2[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_ln2[i]->depth +1, ln_ln2[i]->orderType, ln_ln2[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < ln_N.size() ; i++)
+    {
+        ln_N[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_N[i]->depth +1, ln_N[i]->orderType, ln_N[i]->order -1);
+    }
+    
+    for(unsigned int i = 0; i < ln_n1.size() ; i++)
+    {
+        ln_n1[i]->fillDepthOrder();
+        updateDepthOrder(depth,orderType,order, ln_n1[i]->depth +1, ln_n1[i]->orderType, ln_n1[i]->order -1);
     }
     
     for(unsigned int i = 0; i < ln_i.size() ; i++)
@@ -1366,14 +1613,20 @@ void Addition::classifyln()
     {
         if(index >= ln.size()) break;
         
-        if(ln[index]->haveOnlyNegativeOne())
+        //List of ln
+        if(ln[index]->haveOnlyOne())
         {
-            ln_n1.push_back(ln[index]);
+            ln_1.push_back(ln[index]);
             ln.erase(ln.begin()+index);
         }
-        else if(ln[index]->haveOnlyOne() || ln[index]->haveOnlyTwo())
+        else if(ln[index]->haveOnlyTwo())
         {
             ln_2.push_back(ln[index]);
+            ln.erase(ln.begin()+index);
+        }
+        else if(ln[index]->haveOnlyNegativeOne())
+        {
+            ln_n1.push_back(ln[index]);
             ln.erase(ln.begin()+index);
         }
         else if(ln[index]->haveOnlyComplex())
@@ -1381,8 +1634,52 @@ void Addition::classifyln()
             ln_i.push_back(ln[index]);
             ln.erase(ln.begin()+index);
         }
-        else index++;
+        else
+        {
+            SemiInterger temp = ln[index]->isSemiInterger();
+            if(temp.type == 1 && temp.integer == 2)
+            {
+                ln_ln2.push_back(ln[index]);
+                ln.erase(ln.begin()+index);
+            }
+            else if(temp.type == 0)
+            {
+                ln_N.push_back(ln[index]);
+                ln.erase(ln.begin()+index);
+            }
+            else index++;
+        }
     }
+}
+
+bool Addition::AllListIsEmpty()
+{
+    for(unsigned int i = 0; i < constant.size() ; i++)
+    {
+        if(constant[i]) return false;
+    }
+    
+    for(unsigned int i = 0; i < variable.size() ; i++)
+    {
+        if(variable[i]) return false;
+    }
+    
+    //List of exp
+    if(exp_lnc.size() != 0) return false;
+    if(exp_lnlnc.size() != 0) return false;
+    if(exp.size() != 0) return false;
+    
+    //List of ln
+    if(ln_1.size() != 0) return false;
+    if(ln_2.size() != 0) return false;
+    if(ln_ln2.size() != 0) return false;
+    if(ln_N.size() != 0) return false;
+    if(ln_n1.size() != 0) return false;
+    if(ln_i.size() != 0) return false;
+    if(ln.size() != 0) return false;
+    
+    if(add.size() != 0) return false;
+    return true;
 }
 
 bool Addition::isEmpty()
@@ -1394,18 +1691,7 @@ bool Addition::isEmpty()
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1419,18 +1705,7 @@ bool Addition::haveOnlyZero()
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1444,18 +1719,7 @@ bool Addition::haveOnlyNegativeOne()
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1469,18 +1733,7 @@ bool Addition::haveOnlyOne()
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1494,18 +1747,7 @@ bool Addition::haveOnlyTwo()
     if(nTau) return false;
     if(nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1519,18 +1761,7 @@ bool Addition::haveOnlyComplex()
     if(nTau) return false;
     if(!nComplex) return false;
     if(nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1544,18 +1775,7 @@ bool Addition::haveOnlyInf()
     if(nTau) return false;
     if(nComplex) return false;
     if(!nInfinity) return false;
-    
-    for(unsigned int i = 0; i < variable.size() ; i++)
-    {
-        if(variable[i]) return false;
-    }
-    
-    if(exp.size() != 0) return false;
-    if(ln_n1.size() != 0) return false;
-    if(ln_2.size() != 0) return false;
-    if(ln_i.size() != 0) return false;
-    if(ln.size() != 0) return false;
-    if(add.size() != 0) return false;
+    if(!AllListIsEmpty()) return false;
     
     return true;
 }
@@ -1571,16 +1791,30 @@ bool Addition::haveOnlyOneItem()
     if(nTau) sum++;
     if(nComplex) sum++;
     
+    for(unsigned int i = 0; i < constant.size() ; i++)
+    {
+        if(constant[i]) sum++;
+    }
+    
     for(unsigned int i = 0; i < variable.size() ; i++)
     {
         if(variable[i]) sum++;
     }
     
+    //List of exp
+    sum += exp_lnc.size();
+    sum += exp_lnlnc.size();
     sum += exp.size();
-    sum += ln_n1.size();
+    
+    //List of ln
+    sum += ln_1.size();
     sum += ln_2.size();
+    sum += ln_ln2.size();
+    sum += ln_N.size();
+    sum += ln_n1.size();
     sum += ln_i.size();
     sum += ln.size();
+    
     sum += add.size();
     
     if(sum == 1) return true;
@@ -1594,48 +1828,91 @@ SemiInterger Addition::isSemiInterger()
     vector<SemiInterger> input;
     SemiInterger output;
     
-    for(unsigned int i = 0; i < exp.size() ; i++)
+    //exp_lnc
+    for(unsigned int i = 0; i < exp_lnc.size() ; i++)
     {
-        SemiInterger temp = exp[i]->isSemiInterger();
-        if(temp.type == -1 || temp.type == 0) {output.type = -1; return output;}
-        else
+        SemiInterger temp = exp_lnc[i]->isSemiInterger();
+        if(temp.type == 1)
         {
-            temp.type --;
+            temp.type = 0;
             input.push_back(temp);
         }
-    }
-    
-    for(unsigned int i = 0; i < ln_2.size() ; i++)
-    {
-        SemiInterger temp = ln_2[i]->isSemiInterger();
-        if(temp.type != 0)
+        else if(temp.type == 2)
         {
-            cout<<"Error: ln_2 contains non-interger."<<endl;
-            output.type = -1;
-            return output;
-        }
-        else
-        {
+            cout<<"Error: ln_lnc contains lnlnc."<<endl;
             temp.type = 1;
             input.push_back(temp);
         }
+        else {output.type = -1; return output;}
     }
     
-    for(unsigned int i = 0; i < ln.size() ; i++)
+    //exp_lnlnc
+    for(unsigned int i = 0; i < exp_lnlnc.size() ; i++)
     {
-        SemiInterger temp = ln[i]->isSemiInterger();
-        if(temp.type == -1 || temp.type == 2) {output.type = -1; return output;}
-        else if(temp.type == 0)
+        SemiInterger temp = exp_lnlnc[i]->isSemiInterger();
+        if(temp.type == 2)
         {
-            cout<<"Error: ln contains interger."<<endl;
             temp.type = 1;
             input.push_back(temp);
         }
         else if(temp.type == 1)
         {
-            temp.type = 2;
-            if(temp.integer != 2) cout<<"Error: ln(ln(c)) with c != 2."<<endl;
+            cout<<"Error: ln_lnlnc contains lnc."<<endl;
+            temp.type = 0;
             input.push_back(temp);
+        }
+        else {output.type = -1; return output;}
+    }
+    
+    //ln_2
+    for(unsigned int i = 0; i < ln_2.size() ; i++)
+    {
+        SemiInterger temp = ln_2[i]->isSemiInterger();
+        if(temp.type == 0)
+        {
+            if(temp.integer == 2)
+            {
+                temp.type = 1;
+                input.push_back(temp);
+            }
+            else
+            {
+                cout<<"Error: ln_2 contains non-two."<<endl;
+                temp.type = 1;
+                input.push_back(temp);
+            }
+        }
+        else
+        {
+            cout<<"Error: ln_2 contains non-interger."<<endl;
+            output.type = -1;
+            return output;
+        }
+    }
+    
+    //ln_ln2
+    for(unsigned int i = 0; i < ln_ln2.size() ; i++)
+    {
+        SemiInterger temp = ln_ln2[i]->isSemiInterger();
+        if(temp.type == 1)
+        {
+            if(temp.integer == 2)
+            {
+                temp.type = 2;
+                input.push_back(temp);
+            }
+            else
+            {
+                cout<<"Error: ln_ln2 contains non-ln2."<<endl;
+                temp.type = 2;
+                input.push_back(temp);
+            }
+        }
+        else
+        {
+            cout<<"Error: ln_ln2 contains other thing."<<endl;
+            output.type = -1;
+            return output;
         }
     }
     
@@ -1655,8 +1932,19 @@ SemiInterger Addition::isSemiInterger()
     if(nTau) {output.type = -1; return output;}
     if(nComplex) {output.type = -1; return output;}
     if(nInfinity) {output.type = -1; return output;}
+    
+    if(constant.size() != 0) {output.type = -1; return output;}
+    if(variable.size() != 0) {output.type = -1; return output;}
+    
+    //List of exp
+    if(exp.size() != 0) {output.type = -1; return output;}
+    
+    //List of ln
+    if(ln_1.size() != 0) {output.type = -1; return output;}
+    if(ln_N.size() != 0) {output.type = -1; return output;}
     if(ln_n1.size() != 0) {output.type = -1; return output;}
     if(ln_i.size() != 0) {output.type = -1; return output;}
+    if(ln.size() != 0) {output.type = -1; return output;}
     
     unsigned int nc = 0;
     unsigned int nlnc = 0;
@@ -1747,11 +2035,33 @@ SemiInterger Addition::isSemiInterger()
     else {output.type = -1; return output;}
 }
 
-void Addition::cleanAdd(bool isPrintInteger)
+void Addition::cleanAdd(bool isPrint)
 {
     bool isChanged = false;
     
-    //exp
+    //List of exp
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->exp_lnc.size() ; j++)
+        {
+            exp_lnc.push_back(add[i]->exp_lnc[j]);
+            add[i]->exp_lnc[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->exp_lnc.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->exp_lnlnc.size() ; j++)
+        {
+            exp_lnlnc.push_back(add[i]->exp_lnlnc[j]);
+            add[i]->exp_lnlnc[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->exp_lnlnc.clear();
+    }
+    
     for(unsigned int i = 0; i < add.size() ; i++)
     {
         for(unsigned int j = 0; j < add[i]->exp.size() ; j++)
@@ -1768,21 +2078,20 @@ void Addition::cleanAdd(bool isPrintInteger)
         eraseEmptyElement(add);
         
         cout<<"cleanAdd: exp"<<endl;
-        if(isPrintInteger) getTopmost()->print(true);
-        else getTopmost()->print();
+        if(isPrint) getTopmost()->print();
     }
     isChanged = false;
     
-    //ln
+    //List of ln
     for(unsigned int i = 0; i < add.size() ; i++)
     {
-        for(unsigned int j = 0; j < add[i]->ln_n1.size() ; j++)
+        for(unsigned int j = 0; j < add[i]->ln_1.size() ; j++)
         {
-            ln_n1.push_back(add[i]->ln_n1[j]);
-            add[i]->ln_n1[j]->mother = this;
+            ln_1.push_back(add[i]->ln_1[j]);
+            add[i]->ln_1[j]->mother = this;
             isChanged = true;
         }
-        add[i]->ln_n1.clear();
+        add[i]->ln_1.clear();
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
@@ -1794,6 +2103,39 @@ void Addition::cleanAdd(bool isPrintInteger)
             isChanged = true;
         }
         add[i]->ln_2.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_ln2.size() ; j++)
+        {
+            ln_ln2.push_back(add[i]->ln_ln2[j]);
+            add[i]->ln_ln2[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_ln2.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_N.size() ; j++)
+        {
+            ln_N.push_back(add[i]->ln_N[j]);
+            add[i]->ln_N[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_N.clear();
+    }
+    
+    for(unsigned int i = 0; i < add.size() ; i++)
+    {
+        for(unsigned int j = 0; j < add[i]->ln_n1.size() ; j++)
+        {
+            ln_n1.push_back(add[i]->ln_n1[j]);
+            add[i]->ln_n1[j]->mother = this;
+            isChanged = true;
+        }
+        add[i]->ln_n1.clear();
     }
     
     for(unsigned int i = 0; i < add.size() ; i++)
@@ -1823,8 +2165,7 @@ void Addition::cleanAdd(bool isPrintInteger)
         eraseEmptyElement(add);
         
         cout<<"cleanAdd: ln"<<endl;
-        if(isPrintInteger) getTopmost()->print(true);
-        else getTopmost()->print();
+        if(isPrint) getTopmost()->print();
     }
     isChanged = false;
     
@@ -1851,13 +2192,13 @@ void Addition::cleanAdd(bool isPrintInteger)
         eraseEmptyElement(add);
         
         cout<<"cleanAdd: add"<<endl;
-        if(isPrintInteger) getTopmost()->print(true);
+        if(isPrint) getTopmost()->print();
         else getTopmost()->print();
     }
     isChanged = false;
 }
 
-void Addition::explnCancellation(bool isPrintInteger)
+void Addition::explnCancellation(bool isPrint)
 {
     //\exp(\ln(x_1)) + \exp(\ln(x_2)) + y = x_1 + x_2 + y
     bool isChanged = false;
@@ -1911,8 +2252,7 @@ void Addition::explnCancellation(bool isPrintInteger)
     {
         //not empty because add.push_back
         cout<<"explnCancellation: \\exp(\\ln(x)) = x"<<endl;
-        if(isPrintInteger) getTopmost()->print(true);
-        else getTopmost()->print();
+        if(isPrint) getTopmost()->print();
     }
     isChanged = false;
     
@@ -1964,8 +2304,7 @@ void Addition::explnCancellation(bool isPrintInteger)
     {
         //not empty because add.push_back
         cout<<"explnCancellation: \\ln(\\exp(x)) = x"<<endl;
-        if(isPrintInteger) getTopmost()->print(true);
-        else getTopmost()->print();
+        if(isPrint) getTopmost()->print();
     }
     isChanged = false;
     

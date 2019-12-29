@@ -32,8 +32,17 @@ int main()
         if(i%1000 == 0) cout<<"i = "<<i<<":"<<endl;
         //test1->print();
         
-        Addition* test2 = new Addition(1,test1);
-        test2->print(true);
+        //Addition* test2 = new Addition(1,test1);
+        //test2->print(true);
+        
+        /*
+        Addition* explnn1 = new Addition("\\exp(\\ln(-1))");
+        explnn1->exp[0]->ln_2.push_back(test1);
+        test1->mother = explnn1->exp[0];
+        test1->motherType = 2;
+        test1 = explnn1;
+        test1->print();
+        */
         
         SemiInterger x = test1->isSemiInterger();
         
