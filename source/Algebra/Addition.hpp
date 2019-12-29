@@ -61,7 +61,7 @@ public:
     vector<Addition*> ln_1; //List: ln(1)
     vector<Addition*> ln_2; //List: ln(2)
     vector<Addition*> ln_ln2; //List: ln(ln(2))
-    vector<Addition*> ln_N; //List: ln(c), c is positive integer, c >= 3
+    vector<Addition*> ln_N; //List: ln(c), c is non-negative integer, c = 0 or c >= 3
     vector<Addition*> ln_n1; //List: ln(-1) + ln(-1) + ...
     vector<Addition*> ln_i; //List: ln(i) + ln(i) + ...
     //vector<Addition*> ln_c; //List: ln(c), c is constant
@@ -77,6 +77,8 @@ public:
     Addition(int fundamentalType, unsigned int x); //fundamentalType: 1 = positveInterger, 2 = the nth variable
     Addition(int compositeType, Addition* operand); //compositeType: 1 = exp, 2 = ln, 3 = add
     Addition(Addition* operand1, Addition* operand2); // addition
+    
+    void deleteAllList();
     ~Addition();
     
     string getLatex(bool isPrintInteger = false);

@@ -205,16 +205,16 @@ int main()
     delete test1;
     */
     
-    //*
+    /*
     //test cleanAdd and explnCancellation
     //Addition* test1 = new Addition("\\exp(\\ln( \\exp(x) + x ))");
     Addition* test1 = new Addition("\\exp( \\ln(\\exp(x)) + x )");
     test1->print();
     test1->simplification();
     delete test1;
-    //*/
+    */
     
-    /*
+    //*
     //test constant calculation
     Addition* test1 = new Addition("\\ln((-\\infty)+x)");
     //Addition* test1 = new Addition("\\exp(\\ln(0) + x)");
@@ -222,7 +222,7 @@ int main()
     test1->print();
     test1->simplification();
     delete test1;
-    */
+    //*/
     
     /*
     //test ln_1nic

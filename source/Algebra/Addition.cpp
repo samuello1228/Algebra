@@ -1039,7 +1039,7 @@ Addition::Addition(Addition* operand1, Addition* operand2)
     //sort(add.begin(), add.end(), [](Addition* a, Addition* b)->bool{return compare(a->depth,a->orderType,a->order,b->depth,b->orderType,b->order);});
 }
 
-Addition::~Addition()
+void Addition::deleteAllList()
 {
     //List of exp
     for(unsigned int i = 0; i < exp_lnc.size() ; i++)
@@ -1097,6 +1097,11 @@ Addition::~Addition()
     {
         delete add[i];
     }
+}
+
+Addition::~Addition()
+{
+    deleteAllList();
 }
 
 string Addition::getLatex(bool isPrintInteger)
@@ -1969,6 +1974,8 @@ SemiInterger Addition::isSemiInterger()
     if(ln_i.size() != 0) {output.type = -1; return output;}
     if(ln.size() != 0) {output.type = -1; return output;}
     
+    if(add.size() != 0) {output.type = -1; return output;}
+    
     unsigned int nc = 0;
     unsigned int nlnc = 0;
     unsigned int nlnln2 = 0;
@@ -2395,6 +2402,27 @@ void Addition::ln0()
         else index++;
     }
     
+    index = 0;
+    while(true)
+    {
+        if(index >= ln_N.size()) break;
+        
+        if(ln_N[index]->haveOnlyZero())
+        {
+            delete ln_N[index];
+            ln_N.erase(ln_N.begin()+index);
+            
+            Addition* inf = new Addition("-\\infty");
+            
+            add.push_back(inf);
+            inf->mother = this;
+            inf->motherType = 3;
+            
+            isChanged = true;
+        }
+        else index++;
+    }
+    
     if(isChanged)
     {
         cout<<"ln0: ln(0) = -inf"<<endl;
@@ -2423,46 +2451,32 @@ void Addition::addInf()
         nComplex = false;
         nInfinity = true;
         
+        for(unsigned int i = 0; i < constant.size() ; i++)
+        {
+            constant[i] = false;
+        }
+        
         for(unsigned int i = 0; i < variable.size() ; i++)
         {
             variable[i] = false;
         }
         
-        for(unsigned int i = 0; i < exp.size() ; i++)
-        {
-            delete exp[i];
-        }
+        deleteAllList();
         
-        for(unsigned int i = 0; i < ln_n1.size() ; i++)
-        {
-            delete ln_n1[i];
-        }
-        
-        for(unsigned int i = 0; i < ln_2.size() ; i++)
-        {
-            delete ln_2[i];
-        }
-        
-        for(unsigned int i = 0; i < ln_i.size() ; i++)
-        {
-            delete ln_i[i];
-        }
-        
-        for(unsigned int i = 0; i < ln.size() ; i++)
-        {
-            delete ln[i];
-        }
-        
-        for(unsigned int i = 0; i < add.size() ; i++)
-        {
-            delete add[i];
-        }
-        
+        //list of exp
+        exp_lnc.clear();
+        exp_lnlnc.clear();
         exp.clear();
-        ln_n1.clear();
+        
+        //list of ln
+        ln_1.clear();
         ln_2.clear();
+        ln_ln2.clear();
+        ln_N.clear();
+        ln_n1.clear();
         ln_i.clear();
         ln.clear();
+        
         add.clear();
         
         cout<<"addInf: -inf + x = -inf"<<endl;
@@ -2509,7 +2523,7 @@ void Addition::exp0()
             delete exp[index];
             exp.erase(exp.begin()+index);
             
-            Addition* one = new Addition(1,1);
+            Addition* one = new Addition("1");
             
             add.push_back(one);
             one->mother = this;
