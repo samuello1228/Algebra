@@ -19,8 +19,9 @@ struct SemiInterger
     //0: integer
     //1: ln(c)
     //2: ln(ln(c))
+    //c is positive integer
     
-    int integer;
+    unsigned int integer;
 };
 
 class Addition

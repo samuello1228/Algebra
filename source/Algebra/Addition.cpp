@@ -1590,6 +1590,7 @@ bool Addition::haveOnlyOneItem()
 SemiInterger Addition::isSemiInterger()
 {
     //check whether it can be converted to the form: c, ln(c), ln(ln(c))
+    //where c is positive integer
     vector<SemiInterger> input;
     SemiInterger output;
     
@@ -1609,7 +1610,7 @@ SemiInterger Addition::isSemiInterger()
         SemiInterger temp = ln_2[i]->isSemiInterger();
         if(temp.type != 0)
         {
-            cout<<"Error: ln_c contains non-interger."<<endl;
+            cout<<"Error: ln_2 contains non-interger."<<endl;
             output.type = -1;
             return output;
         }
@@ -1650,9 +1651,11 @@ SemiInterger Addition::isSemiInterger()
     //cout<<"start integer reduction:"<<endl;
     //print(true);
     
+    if(nNegative) {output.type = -1; return output;}
     if(nTau) {output.type = -1; return output;}
     if(nComplex) {output.type = -1; return output;}
     if(nInfinity) {output.type = -1; return output;}
+    if(ln_n1.size() != 0) {output.type = -1; return output;}
     if(ln_i.size() != 0) {output.type = -1; return output;}
     
     unsigned int nc = 0;
@@ -1674,14 +1677,12 @@ SemiInterger Addition::isSemiInterger()
     
     //Case 1: 1+2+4
     //Case 2: ln(ln(2)) + ln(n_1) + ln(n_2) + ... = ln(ln(2^(n_1*n_2*...)))
-    //Case 3: ln(n) + ln(-1) = ln(-n)
-    if(ln_n1.size() == 0 && nlnc == 0 && nlnln2 == 0)
+    if(nlnc == 0 && nlnln2 == 0)
     {
         //Case 1: 1+2+4
         output.type = 0;
         output.integer = 0;
         
-        if(nNegative) output.integer--;
         if(nOne) output.integer += 1;
         if(nTwo) output.integer += 2;
         
@@ -1697,10 +1698,9 @@ SemiInterger Addition::isSemiInterger()
         }
         return output;
     }
-    else if(ln_n1.size() == 0 && (nlnc + nlnln2) >= 1)
+    else if(nc == 0 && (nlnc + nlnln2) >= 1)
     {
         //Case 2: ln(ln(2)) + ln(n_1) + ln(n_2) + ... = ln(ln(2^(n_1*n_2*...)))
-        if(nNegative) {output.type = -1; return output;}
         if(nOne) {output.type = -1; return output;}
         if(nTwo) {output.type = -1; return output;}
         
@@ -1741,14 +1741,6 @@ SemiInterger Addition::isSemiInterger()
         {
             output.type = 1;
         }
-        
-        return output;
-    }
-    else if(ln_n1.size() == 1 && ln_2.size() == 1 && ln.size() == 0)
-    {
-        //Case 3: ln(n) + ln(-1) = ln(-n)
-        //cout<<"isSemiInterger: ln(n) + ln(-1) = ln(-n)"<<endl;
-        //getTopmost()->print(true);
         
         return output;
     }
