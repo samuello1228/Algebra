@@ -1821,6 +1821,29 @@ bool Addition::haveOnlyOneItem()
     else return false;
 }
 
+bool Addition::containFundamental()
+{
+    if(nZero) return true;
+    if(nNegative) return true;
+    if(nOne) return true;
+    if(nTwo) return true;
+    if(nTau) return true;
+    if(nComplex) return true;
+    if(nInfinity) return true;
+    
+    for(unsigned int j = 0; j < constant.size() ; j++)
+    {
+        if(constant[j]) return true;
+    }
+    
+    for(unsigned int j = 0; j < variable.size() ; j++)
+    {
+        if(variable[j]) return true;
+    }
+    
+    return false;
+}
+
 SemiInterger Addition::isSemiInterger()
 {
     //check whether it can be converted to the form: c, ln(c), ln(ln(c))
@@ -2198,47 +2221,45 @@ void Addition::cleanAdd(bool isPrint)
     isChanged = false;
 }
 
-void Addition::explnCancellation(bool isPrint)
+bool explnCancellationAux(Addition* x, vector<Addition*>& exp)
 {
-    //\exp(\ln(x_1)) + \exp(\ln(x_2)) + y = x_1 + x_2 + y
+    //exp(ln(x_1)) + exp(ln(x_2)) + y = x_1 + x_2 + y
     bool isChanged = false;
     int index = 0;
     while(true)
     {
         if(index >= exp.size()) break;
         
-        if(exp[index]->nZero) {index++; continue;}
-        if(exp[index]->nNegative) {index++; continue;}
-        if(exp[index]->nOne) {index++; continue;}
-        if(exp[index]->nTwo) {index++; continue;}
-        if(exp[index]->nTau) {index++; continue;}
-        if(exp[index]->nComplex) {index++; continue;}
-        if(exp[index]->nInfinity) {index++; continue;}
+        if(exp[index]->containFundamental()) {index++; continue;}
         
-        bool nVariable = false;
-        for(unsigned int j = 0; j < exp[index]->variable.size() ; j++)
-        {
-            if(exp[index]->variable[j]) nVariable = true;
-        }
-        if(nVariable) {index++; continue;}
-        
+        //List of exp
+        if(exp[index]->exp_lnc.size() != 0) {index++; continue;}
+        if(exp[index]->exp_lnlnc.size() != 0) {index++; continue;}
         if(exp[index]->exp.size() != 0) {index++; continue;}
+        
         if(exp[index]->add.size() != 0) {index++; continue;}
         
-        if(exp[index]->ln_n1.size() +
+        //List of ln
+        if(exp[index]->ln_1.size()  +
            exp[index]->ln_2.size()  +
+           exp[index]->ln_ln2.size()  +
+           exp[index]->ln_N.size()  +
+           exp[index]->ln_n1.size() +
            exp[index]->ln_i.size()  +
            exp[index]->ln.size() != 1) {index++; continue;}
         
         //move x to add
         vector<Addition*>* ln_x = nullptr;
-        if     (exp[index]->ln_n1.size() == 1) ln_x = &(exp[index]->ln_n1);
-        else if(exp[index]->ln_2.size() == 1)  ln_x = &(exp[index]->ln_2);
-        else if(exp[index]->ln_i.size() == 1)  ln_x = &(exp[index]->ln_i);
-        else if(exp[index]->ln.size() == 1)    ln_x = &(exp[index]->ln);
+             if(exp[index]->ln_1.size() == 1)   ln_x = &(exp[index]->ln_1);
+        else if(exp[index]->ln_2.size() == 1)   ln_x = &(exp[index]->ln_2);
+        else if(exp[index]->ln_ln2.size() == 1) ln_x = &(exp[index]->ln_ln2);
+        else if(exp[index]->ln_N.size() == 1)   ln_x = &(exp[index]->ln_N);
+        else if(exp[index]->ln_n1.size() == 1)  ln_x = &(exp[index]->ln_n1);
+        else if(exp[index]->ln_i.size() == 1)   ln_x = &(exp[index]->ln_i);
+        else if(exp[index]->ln.size() == 1)     ln_x = &(exp[index]->ln);
         
-        add.push_back((*ln_x)[0]);
-        (*ln_x)[0]->mother = this;
+        x->add.push_back((*ln_x)[0]);
+        (*ln_x)[0]->mother = x;
         (*ln_x)[0]->motherType = 3;
         
         (*ln_x).clear();
@@ -2248,57 +2269,83 @@ void Addition::explnCancellation(bool isPrint)
         isChanged = true;
     }
     
+    return isChanged;
+}
+
+bool lnexpCancellationAux(Addition* x, vector<Addition*>& ln)
+{
+    //For EXP[ ln(exp(x_1)) + ln(exp(x_2)) + y ] = EXP[ x_1 + x_2 + y ]
+    if(x->mother == nullptr) return false;
+    if(x->motherType != 1) return false;
+    
+    bool isChanged = false;
+    int index = 0;
+    while(true)
+    {
+        if(index >= ln.size()) break;
+        
+        if(ln[index]->containFundamental()) {index++; continue;}
+        
+        //List of ln
+        if(ln[index]->ln_1.size() != 0) {index++; continue;}
+        if(ln[index]->ln_2.size() != 0) {index++; continue;}
+        if(ln[index]->ln_ln2.size() != 0) {index++; continue;}
+        if(ln[index]->ln_N.size() != 0) {index++; continue;}
+        if(ln[index]->ln_n1.size() != 0) {index++; continue;}
+        if(ln[index]->ln_i.size() != 0) {index++; continue;}
+        if(ln[index]->ln.size() != 0) {index++; continue;}
+        
+        if(ln[index]->add.size() != 0) {index++; continue;}
+        
+        //List of exp
+        if(ln[index]->exp_lnc.size() +
+           ln[index]->exp_lnlnc.size() +
+           ln[index]->exp.size() != 1) {index++; continue;}
+        
+        //move x to add
+        vector<Addition*>* exp_x = nullptr;
+             if(ln[index]->exp_lnc.size() == 1)   exp_x = &(ln[index]->exp_lnc);
+        else if(ln[index]->exp_lnlnc.size() == 1) exp_x = &(ln[index]->exp_lnlnc);
+        else if(ln[index]->exp.size() == 1)       exp_x = &(ln[index]->exp);
+        
+        x->add.push_back((*exp_x)[0]);
+        (*exp_x)[0]->mother = x;
+        (*exp_x)[0]->motherType = 3;
+        
+        (*exp_x).clear();
+        delete ln[index];
+        ln.erase(ln.begin()+index);
+        
+        isChanged = true;
+    }
+    
+    return isChanged;
+}
+
+void Addition::explnCancellation(bool isPrint)
+{
+    //List of exp
+    bool isChanged =
+    explnCancellationAux(this,exp_lnc) ||
+    explnCancellationAux(this,exp_lnlnc) ||
+    explnCancellationAux(this,exp);
+    
     if(isChanged)
     {
         //not empty because add.push_back
         cout<<"explnCancellation: \\exp(\\ln(x)) = x"<<endl;
         if(isPrint) getTopmost()->print();
     }
-    isChanged = false;
     
-    //For \exp(\ln(\exp(x_1)) + \ln(\exp(x_2)) + y) = \exp(x_1 + x_2 + y)
-    if(mother == nullptr) return;
-    if(motherType != 1) return;
-    
-    index = 0;
-    while(true)
-    {
-        if(index >= ln.size()) break;
-        
-        if(ln[index]->nZero) {index++; continue;}
-        if(ln[index]->nNegative) {index++; continue;}
-        if(ln[index]->nOne) {index++; continue;}
-        if(ln[index]->nTwo) {index++; continue;}
-        if(ln[index]->nTau) {index++; continue;}
-        if(ln[index]->nComplex) {index++; continue;}
-        if(ln[index]->nInfinity) {index++; continue;}
-        
-        bool nVariable = false;
-        for(unsigned int j = 0; j < ln[index]->variable.size() ; j++)
-        {
-            if(ln[index]->variable[j]) nVariable = true;
-        }
-        if(nVariable) {index++; continue;}
-        
-        if(ln[index]->ln_n1.size() != 0) {index++; continue;}
-        if(ln[index]->ln_2.size() != 0) {index++; continue;}
-        if(ln[index]->ln_i.size() != 0) {index++; continue;}
-        if(ln[index]->ln.size() != 0) {index++; continue;}
-        if(ln[index]->add.size() != 0) {index++; continue;}
-        
-        if(ln[index]->exp.size() != 1) {index++; continue;}
-        
-        //move x to add
-        add.push_back(ln[index]->exp[0]);
-        ln[index]->exp[0]->mother = this;
-        ln[index]->exp[0]->motherType = 3;
-        
-        ln[index]->exp.clear();
-        delete ln[index];
-        ln.erase(ln.begin()+index);
-        
-        isChanged = true;
-    }
+    //List of ln
+    isChanged =
+    lnexpCancellationAux(this,ln_1) ||
+    lnexpCancellationAux(this,ln_2) ||
+    lnexpCancellationAux(this,ln_ln2) ||
+    lnexpCancellationAux(this,ln_N) ||
+    lnexpCancellationAux(this,ln_n1) ||
+    lnexpCancellationAux(this,ln_i) ||
+    lnexpCancellationAux(this,ln);
     
     if(isChanged)
     {

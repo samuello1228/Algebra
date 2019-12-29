@@ -23,7 +23,7 @@ int main()
     Addition* y = new Addition("y");
     Addition* z = new Addition("z");
     
-    //*
+    /*
     //test integer
     for(int i=1; i<=10000; i++)
     //for(int i=15; i<=15; i++)
@@ -35,14 +35,13 @@ int main()
         //Addition* test2 = new Addition(1,test1);
         //test2->print(true);
         
-        /*
         Addition* explnn1 = new Addition("\\exp(\\ln(-1))");
         explnn1->exp[0]->ln_2.push_back(test1);
         test1->mother = explnn1->exp[0];
         test1->motherType = 2;
         test1 = explnn1;
         test1->print();
-        */
+     
         
         SemiInterger x = test1->isSemiInterger();
         
@@ -70,7 +69,7 @@ int main()
         delete test1;
         //cout<<endl;
     }
-    //*/
+    */
     
     /*
     {
@@ -206,14 +205,14 @@ int main()
     delete test1;
     */
     
-    /*
+    //*
     //test cleanAdd and explnCancellation
     //Addition* test1 = new Addition("\\exp(\\ln( \\exp(x) + x ))");
     Addition* test1 = new Addition("\\exp( \\ln(\\exp(x)) + x )");
     test1->print();
     test1->simplification();
     delete test1;
-    */
+    //*/
     
     /*
     //test constant calculation

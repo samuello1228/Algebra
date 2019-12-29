@@ -97,6 +97,7 @@ public:
     bool haveOnlyComplex();
     bool haveOnlyInf();
     bool haveOnlyOneItem();
+    bool containFundamental();
     SemiInterger isSemiInterger();
     
     void basicArithmetic();
